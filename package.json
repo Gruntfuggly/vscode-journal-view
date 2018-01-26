@@ -1,0 +1,79 @@
+{
+    "name": "vscode-journal-view",
+    "displayName": "vscode-journal-view",
+    "icon": "resources/vscode-journal.png",
+    "description": "Extends the vscode-journal extension with a viewlet",
+    "version": "0.0.1",
+    "publisher": "Gruntfuggly",
+    "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
+    "engines": {
+        "vscode": "^1.5.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./extension",
+    "contributes": {
+        "views": {
+            "explorer": [
+                {
+                    "id": "vscode-journal-view",
+                    "name": "Journal",
+                    "when": "journal-tree-has-content"
+                }
+            ]
+        },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "vscode-journal-view.today",
+                    "when": "view == vscode-journal-view",
+                    "group": "navigation"
+                },
+                {
+                    "command": "vscode-journal-view.refresh",
+                    "when": "view == vscode-journal-view",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "vscode-journal-view.today",
+                "title": "Today",
+                "category": "vscode-journal-view",
+                "icon": {
+                    "dark": "resources/icons/dark/journal-entry.svg",
+                    "light": "resources/icons/light/journal-entry.svg"
+                }
+            },
+            {
+                "command": "vscode-journal-view.refresh",
+                "title": "Refresh",
+                "category": "vscode-journal-view",
+                "icon": {
+                    "dark": "resources/icons/dark/refresh.svg",
+                    "light": "resources/icons/light/refresh.svg"
+                }
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "vscode-journal-view configuration",
+            "properties": {
+                "vscode-journal-view.expanded": {
+                    "type": "boolean",
+                    "description": "Set to true if you want the tree to be initially expanded",
+                    "default": false
+                }
+            }
+        }
+    },
+    "scripts": {},
+    "extensionDependencies": [
+        "pajoma.vscode-journal"
+    ]
+}
