@@ -15,7 +15,12 @@ var getMonth = function( number )
     return date.toLocaleString( vscode.env.language, { month: "long" } );
 }
 
-function nth( n ) { return [ "st", "nd", "rd" ][ ( ( n + 90 ) % 100 - 10 ) % 10 - 1 ] || "th" }
+var getDay = function( date )
+{
+    function nth( n ) { return [ "st", "nd", "rd" ][ ( ( n + 90 ) % 100 - 10 ) % 10 - 1 ] || "th" }
+
+    return date.toLocaleString( vscode.env.language, { weekday: 'long' } ) + ' ' + date.getDate() + nth( date.getDate() );
+}
 
 class JournalDataProvider
 {
@@ -72,8 +77,12 @@ class JournalDataProvider
 
         if( element.type === PATH )
         {
-            treeItem.collapsibleState = vscode.workspace.getConfiguration( 'vscode-journal-tree' ).expanded ?
-                vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+            treeItem.collapsibleState = element.state;
+            if( treeItem.collapsibleState === 0 || treeItem.collapsibleState === undefined )
+            {
+                treeItem.collapsibleState = vscode.workspace.getConfiguration( 'vscode-journal-tree' ).expanded ?
+                    vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+            }
         }
         else if( element.type === ENTRY )
         {
@@ -102,23 +111,24 @@ class JournalDataProvider
     {
         vscode.commands.executeCommand( 'setContext', 'journal-tree-has-content', true );
 
+        var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+
         var fullPath = path.resolve( rootFolder, entryPath );
         var relativePath = path.relative( rootFolder, fullPath );
         var parts = relativePath.split( path.sep );
+        var dayNumber = parseInt( path.parse( parts.pop() ).name );
 
         var pathElement;
 
-        var dayNumber = parseInt( path.parse( parts.pop() ).name );
-        var date = new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber );
-        var dayName = date.toLocaleString( vscode.env.language, { weekday: 'long' } ) + ' ' + dayNumber + nth( dayNumber );
-
         var entryElement = {
-            type: ENTRY, name: dayName, file: fullPath
+            type: ENTRY,
+            name: getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) ),
+            file: fullPath
         };
 
         function findSubPath( e )
         {
-            return e.type === PATH && e.name === this;
+            return e.name === this;
         }
 
         var parent = elements;
@@ -134,7 +144,12 @@ class JournalDataProvider
             {
                 var subPath = path.join( rootFolder, parts.slice( 0, level + 1 ).join( path.sep ) );
                 pathElement = {
-                    type: PATH, file: subPath, name: p, parent: pathElement, elements: [], entries: []
+                    type: PATH,
+                    file: subPath,
+                    name: p,
+                    parent: pathElement,
+                    elements: [],
+                    entries: []
                 };
 
                 parent.push( pathElement );
@@ -152,6 +167,38 @@ class JournalDataProvider
 
             this._onDidChangeTreeData.fire();
         }
+    }
+
+    expandToday( rootFolder )
+    {
+        var d = new Date();
+        var today = d.getFullYear() + "/" + getMonth( d.getMonth() ) + "/" + getDay( d ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+
+        var fullPath = path.resolve( rootFolder, today );
+        var relativePath = path.relative( rootFolder, fullPath );
+        var parts = relativePath.split( path.sep );
+
+        var level = 0;
+
+        function findSubPath( e )
+        {
+            return e.name === this;
+        }
+
+        var parent = elements;
+        var element;
+        do
+        {
+            element = parent.find( findSubPath, parts[ level ] );
+            if( element !== undefined )
+            {
+                element.state = vscode.TreeItemCollapsibleState.Expanded;
+                this._onDidChangeTreeData.fire( element );
+                parent = element.elements;
+                ++level;
+            }
+        }
+        while( element !== undefined )
     }
 
     refresh()

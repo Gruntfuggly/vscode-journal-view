@@ -67,6 +67,7 @@ function activate( context )
                     provider.add( rootFolder, path );
                 } );
                 provider.refresh();
+                provider.expandToday( getRootFolder() );
             }
         } );
     }
