@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-    "version": "0.0.2",
+  "version": "0.0.3",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -37,6 +37,11 @@
                     "command": "vscode-journal-view.refresh",
                     "when": "view == vscode-journal-view",
                     "group": "navigation"
+				},
+				{
+					"command": "vscode-journal-view.search",
+					"when": "view == vscode-journal-view",
+					"group": "navigation"
                 }
             ]
         },
@@ -58,6 +63,15 @@
                     "dark": "resources/icons/dark/refresh.svg",
                     "light": "resources/icons/light/refresh.svg"
                 }
+			},
+			{
+				"command": "vscode-journal-view.search",
+				"title": "Search",
+				"category": "vscode-journal-view",
+				"icon": {
+					"dark": "resources/icons/dark/search.svg",
+					"light": "resources/icons/light/search.svg"
+				}
             }
         ],
         "configuration": {
@@ -75,5 +89,8 @@
     "scripts": {},
     "extensionDependencies": [
         "pajoma.vscode-journal"
-    ]
+  ],
+  "dependencies": {
+    "find-in-file": "^1.0.1"
+  }
 }

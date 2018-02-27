@@ -44,14 +44,7 @@ class JournalDataProvider
         }
         else if( element.type === PATH )
         {
-            if( element.elements && element.elements.length > 0 )
-            {
-                return element.elements;
-            }
-            else
-            {
-                return element.entries;
-            }
+            return element.elements;
         }
         else if( element.type === ENTRY )
         {
@@ -71,7 +64,7 @@ class JournalDataProvider
 
     getTreeItem( element )
     {
-        let treeItem = new vscode.TreeItem( element.name + ( element.pathLabel ? element.pathLabel : "" ) );
+        let treeItem = new vscode.TreeItem( element.displayName + ( element.pathLabel ? element.pathLabel : "" ) );
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         treeItem.resourceUri = new vscode.Uri.file( element.file );
 
@@ -122,7 +115,8 @@ class JournalDataProvider
 
         var entryElement = {
             type: ENTRY,
-            name: getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) ),
+            name: dayNumber,
+            displayName: getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) ),
             file: fullPath
         };
 
@@ -134,11 +128,6 @@ class JournalDataProvider
         var parent = elements;
         parts.map( function( p, level )
         {
-            if( level === parts.length - 1 )
-            {
-                p = getMonth( p );
-            }
-
             var child = parent.find( findSubPath, p );
             if( !child )
             {
@@ -147,9 +136,9 @@ class JournalDataProvider
                     type: PATH,
                     file: subPath,
                     name: p,
+                    displayName: ( level === parts.length - 1 ) ? getMonth( p ) : p,
                     parent: pathElement,
-                    elements: [],
-                    entries: []
+                    elements: []
                 };
 
                 parent.push( pathElement );
@@ -161,20 +150,17 @@ class JournalDataProvider
             parent = pathElement.elements;
         } );
 
-        if( !pathElement.entries.find( function( e ) { return e.name === this; }, entryElement.name ) )
+        if( !pathElement.elements.find( function( e ) { return e.name === this; }, entryElement.name ) )
         {
-            pathElement.entries.push( entryElement );
+            pathElement.elements.push( entryElement );
 
             this._onDidChangeTreeData.fire();
         }
     }
 
-    expandToday( rootFolder )
+    expand( rootFolder, date )
     {
-        var d = new Date();
-        var today = d.getFullYear() + "/" + getMonth( d.getMonth() ) + "/" + getDay( d ) + vscode.workspace.getConfiguration( 'journal' ).ext;
-
-        var fullPath = path.resolve( rootFolder, today );
+        var fullPath = path.resolve( rootFolder, date );
         var relativePath = path.relative( rootFolder, fullPath );
         var parts = relativePath.split( path.sep );
 

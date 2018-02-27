@@ -5,6 +5,7 @@ var childProcess = require( 'child_process' );
 var fs = require( 'fs' );
 var path = require( 'path' );
 var os = require( 'os' );
+var findInFile = require( 'find-in-file' );
 
 function activate( context )
 {
@@ -54,8 +55,10 @@ function activate( context )
         return rootFolder;
     }
 
-    function populate()
+    function refresh()
     {
+        provider.clear();
+
         const rootFolder = getRootFolder();
 
         scan( rootFolder, function( error, results )
@@ -66,17 +69,39 @@ function activate( context )
                 {
                     provider.add( rootFolder, path );
                 } );
+
+                var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+                provider.expand( getRootFolder(), today );
+
                 provider.refresh();
-                provider.expandToday( getRootFolder() );
             }
         } );
     }
 
-    function refresh()
+    function search( term )
     {
         provider.clear();
 
-        populate();
+        const rootFolder = getRootFolder();
+
+        scan( rootFolder, function( error, results )
+        {
+            if( results )
+            {
+                results.map( function( path )
+                {
+                    if( findInFile( { files: path, find: term }, function( err, matched )
+                    {
+                        if( !err && matched.length > 0 )
+                        {
+                            provider.add( rootFolder, path );
+                            provider.expand( rootFolder, path );
+                        }
+                    } ) );
+                } );
+                provider.refresh();
+            }
+        } );
     }
 
     function register()
@@ -98,6 +123,19 @@ function activate( context )
         } );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.refresh', refresh ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.search', function()
+        {
+            vscode.window.showInputBox( { prompt: "Search the journal" } ).then(
+                function( term )
+                {
+                    if( term )
+                    {
+                        search( term );
+                    }
+                } );
+        } ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.today',
             function()
             {
