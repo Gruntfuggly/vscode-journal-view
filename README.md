@@ -10,6 +10,10 @@ Alternatively, open Visual Studio code, press `Ctrl+P` or `Cmd+P` and type:
 
     > ext install vscode-journal-view
 
+## Known issues
+
+Month and day names should be shown according to your locale, but ordinal indicators (st, nd, rd, etc.) are only English. If anybody knows how to do this in javascript please tell me!
+
 ### Source Code
 
 The source code is available on GitHub [here](https://github.com/Gruntfuggly/vscode-journal-view).

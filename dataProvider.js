@@ -11,9 +11,11 @@ const ENTRY = "entry";
 var getMonth = function( number )
 {
     var date = new Date();
-    date.setMonth( number );
+    date.setMonth( parseInt( number ) - 1 );
     return date.toLocaleString( vscode.env.language, { month: "long" } );
 }
+
+function nth( n ) { return [ "st", "nd", "rd" ][ ( ( n + 90 ) % 100 - 10 ) % 10 - 1 ] || "th" }
 
 class JournalDataProvider
 {
@@ -106,8 +108,12 @@ class JournalDataProvider
 
         var pathElement;
 
+        var dayNumber = parseInt( path.parse( parts.pop() ).name );
+        var date = new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber );
+        var dayName = date.toLocaleString( vscode.env.language, { weekday: 'long' } ) + ' ' + dayNumber + nth( dayNumber );
+
         var entryElement = {
-            type: ENTRY, name: path.parse( parts.pop() ).name, file: fullPath
+            type: ENTRY, name: dayName, file: fullPath
         };
 
         function findSubPath( e )
@@ -140,9 +146,12 @@ class JournalDataProvider
             parent = pathElement.elements;
         } );
 
-        pathElement.entries.push( entryElement );
+        if( !pathElement.entries.find( function( e ) { return e.name === this; }, entryElement.name ) )
+        {
+            pathElement.entries.push( entryElement );
 
-        this._onDidChangeTreeData.fire();
+            this._onDidChangeTreeData.fire();
+        }
     }
 
     refresh()

@@ -44,21 +44,30 @@ function activate( context )
         } );
     }
 
-    function populate()
+    function getRootFolder()
     {
         var rootFolder = vscode.workspace.getConfiguration( 'journal' ).base;
         if( rootFolder === "" )
         {
             rootFolder = path.resolve( os.homedir(), "Journal" );
         }
-        console.log( rootFolder );
+        return rootFolder;
+    }
+
+    function populate()
+    {
+        const rootFolder = getRootFolder();
+
         scan( rootFolder, function( error, results )
         {
-            results.map( function( path )
+            if( results )
             {
-                provider.add( rootFolder, path );
-            } );
-            provider.refresh();
+                results.map( function( path )
+                {
+                    provider.add( rootFolder, path );
+                } );
+                provider.refresh();
+            }
         } );
     }
 
@@ -71,24 +80,6 @@ function activate( context )
 
     function register()
     {
-        var findCommand = function()
-        {
-            vscode.commands.getCommands( true ).then(
-                function( cmd )
-                {
-                    console.log( "fulfilled" );
-                    console.log( cmd );
-                },
-                function()
-                {
-                    console.log( "failed" );
-                    console.log( arguments );
-                }
-            );
-        };
-
-        findCommand();
-
         vscode.window.registerTreeDataProvider( 'vscode-journal-view', provider );
 
         vscode.commands.registerCommand( 'vscode-journal-view.open', ( file ) =>
@@ -110,7 +101,7 @@ function activate( context )
             function()
             {
                 var xmlExtension = vscode.extensions.getExtension( 'pajoma.vscode-journal' );
-                if( xmlExtension.isActive == false )
+                if( xmlExtension.isActive === false )
                 {
                     xmlExtension.activate().then(
                         function()
@@ -131,6 +122,19 @@ function activate( context )
 
         refresh();
     }
+
+    var onSave = vscode.workspace.onDidSaveTextDocument( ( e ) =>
+    {
+        const rootFolder = getRootFolder();
+
+        if( rootFolder )
+        {
+            if( e.fileName.indexOf( rootFolder.substr( 1 ) ) === 1 )
+            {
+                provider.add( rootFolder, e.fileName );
+            }
+        }
+    } );
 
     register();
 }
