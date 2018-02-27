@@ -40,7 +40,7 @@ class JournalDataProvider
             {
                 return elements;
             }
-            return [ { name: "Nothing found" } ];
+            return [ { displayName: "Nothing found" } ];
         }
         else if( element.type === PATH )
         {
@@ -66,14 +66,17 @@ class JournalDataProvider
     {
         let treeItem = new vscode.TreeItem( element.displayName + ( element.pathLabel ? element.pathLabel : "" ) );
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
-        treeItem.resourceUri = new vscode.Uri.file( element.file );
+        if( element.file )
+        {
+            treeItem.resourceUri = new vscode.Uri.file( element.file );
+        }
 
         if( element.type === PATH )
         {
             treeItem.collapsibleState = element.state;
             if( treeItem.collapsibleState === 0 || treeItem.collapsibleState === undefined )
             {
-                treeItem.collapsibleState = vscode.workspace.getConfiguration( 'vscode-journal-tree' ).expanded ?
+                treeItem.collapsibleState = vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "expanded" ?
                     vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             }
         }
@@ -102,8 +105,6 @@ class JournalDataProvider
 
     add( rootFolder, entryPath )
     {
-        vscode.commands.executeCommand( 'setContext', 'journal-tree-has-content', true );
-
         var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
 
         var fullPath = path.resolve( rootFolder, entryPath );

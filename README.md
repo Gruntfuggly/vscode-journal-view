@@ -2,6 +2,11 @@
 
 This extension adds an explorer viewlet (tree view) to the excellent [vscode-journal](https://marketplace.visualstudio.com/items?itemName=Pajoma.vscode-journal) extension allowing quick access to the journal files.
 
+The three icons on the view title bar are Refresh (use to clear search filter), Search and Today. Today opens a new journal entry for the current date.
+
+##### TODO: When clicking entries after the search filter, the search term should be highlighted in the page and shown in the scrollbar.
+##### TODO: Handle zero search results properly
+
 ## Installing
 
 You can install the latest version of the extension via the Visual Studio Marketplace [here](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.vscode-journal-view).
@@ -10,7 +15,17 @@ Alternatively, open Visual Studio code, press `Ctrl+P` or `Cmd+P` and type:
 
     > ext install vscode-journal-view
 
+## Configuration
+
+The extension can be customised as follows:
+
+`vscode-journal-view.initial`
+
+Determines how the tree is initially displayed. Can be 'collapsed', 'expanded' or 'today'.
+
 ## Known issues
+
+The initial view can be set to "today", which will try to show the tree collapsed apart revealing the current day. Currently, this reveals the current month only (and doesn't scroll it into view) but some changes to the tree views are expected soon.
 
 Month and day names should be shown according to your locale, but ordinal indicators (st, nd, rd, etc.) are only English. If anybody knows how to do this in javascript please tell me!
 
@@ -18,3 +33,6 @@ Month and day names should be shown according to your locale, but ordinal indica
 
 The source code is available on GitHub [here](https://github.com/Gruntfuggly/vscode-journal-view).
 
+### Credits
+
+Pajoma, for the actual implementation of the Journal. I reused the icon too (sorry).

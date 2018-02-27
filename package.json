@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-  "version": "0.0.3",
+    "version": "0.0.3",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -21,8 +21,7 @@
             "explorer": [
                 {
                     "id": "vscode-journal-view",
-                    "name": "Journal",
-                    "when": "journal-tree-has-content"
+                    "name": "Journal"
                 }
             ]
         },
@@ -37,11 +36,11 @@
                     "command": "vscode-journal-view.refresh",
                     "when": "view == vscode-journal-view",
                     "group": "navigation"
-				},
-				{
-					"command": "vscode-journal-view.search",
-					"when": "view == vscode-journal-view",
-					"group": "navigation"
+                },
+                {
+                    "command": "vscode-journal-view.search",
+                    "when": "view == vscode-journal-view",
+                    "group": "navigation"
                 }
             ]
         },
@@ -63,25 +62,30 @@
                     "dark": "resources/icons/dark/refresh.svg",
                     "light": "resources/icons/light/refresh.svg"
                 }
-			},
-			{
-				"command": "vscode-journal-view.search",
-				"title": "Search",
-				"category": "vscode-journal-view",
-				"icon": {
-					"dark": "resources/icons/dark/search.svg",
-					"light": "resources/icons/light/search.svg"
-				}
+            },
+            {
+                "command": "vscode-journal-view.search",
+                "title": "Search",
+                "category": "vscode-journal-view",
+                "icon": {
+                    "dark": "resources/icons/dark/search.svg",
+                    "light": "resources/icons/light/search.svg"
+                }
             }
         ],
         "configuration": {
             "type": "object",
             "title": "vscode-journal-view configuration",
             "properties": {
-                "vscode-journal-view.expanded": {
-                    "type": "boolean",
-                    "description": "Set to true if you want the tree to be initially expanded",
-                    "default": false
+                "vscode-journal-view.initial": {
+                    "type": "string",
+                    "enum": [
+                        "collapsed",
+                        "expanded",
+                        "today"
+                    ],
+                    "description": "Determines how the tree is initially displayed. Can be 'collapsed', 'expanded' or 'today'.",
+                    "default": "today"
                 }
             }
         }
@@ -89,8 +93,8 @@
     "scripts": {},
     "extensionDependencies": [
         "pajoma.vscode-journal"
-  ],
-  "dependencies": {
-    "find-in-file": "^1.0.1"
-  }
+    ],
+    "dependencies": {
+        "find-in-file": "^1.0.1"
+    }
 }

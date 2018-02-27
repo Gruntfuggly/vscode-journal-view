@@ -70,9 +70,11 @@ function activate( context )
                     provider.add( rootFolder, path );
                 } );
 
-                var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
-                provider.expand( getRootFolder(), today );
-
+                if( vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "today" )
+                {
+                    var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+                    provider.expand( getRootFolder(), today );
+                }
                 provider.refresh();
             }
         } );
@@ -99,7 +101,6 @@ function activate( context )
                         }
                     } ) );
                 } );
-                provider.refresh();
             }
         } );
     }
