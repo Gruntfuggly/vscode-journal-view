@@ -9,7 +9,16 @@ var findInFile = require( 'find-in-file' );
 
 function activate( context )
 {
+    var currentSearchTerm;
+
     var provider = new TreeView.JournalDataProvider( context );
+
+    const decorationType = vscode.window.createTextEditorDecorationType( {
+        overviewRulerColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ),
+        overviewRulerLane: vscode.OverviewRulerLane.Right,
+        light: { backgroundColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ) },
+        dark: { backgroundColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ) }
+    } );
 
     function scan( dir, done )
     {
@@ -55,8 +64,19 @@ function activate( context )
         return rootFolder;
     }
 
+    function isJournalFile( filename )
+    {
+        const rootFolder = getRootFolder();
+
+        if( rootFolder )
+        {
+            return filename.indexOf( rootFolder.substr( 1 ) ) === 1;
+        }
+    }
+
     function refresh()
     {
+        currentSearchTerm = undefined;
         provider.clear();
 
         const rootFolder = getRootFolder();
@@ -92,7 +112,7 @@ function activate( context )
             {
                 results.map( function( path )
                 {
-                    if( findInFile( { files: path, find: term }, function( err, matched )
+                    if( findInFile( { files: path, find: new RegExp( term, 'gi' ) }, function( err, matched )
                     {
                         if( !err && matched.length > 0 )
                         {
@@ -103,6 +123,49 @@ function activate( context )
                 } );
             }
         } );
+
+        if( isJournalFile( vscode.window.activeTextEditor.document.fileName ) )
+        {
+            highlightSearchTerm( false );
+        }
+    }
+
+    function highlightSearchTerm( positionCursor )
+    {
+        var terms = [];
+        var position;
+
+        var editor = vscode.window.activeTextEditor;
+
+        if( currentSearchTerm )
+        {
+            const text = editor.document.getText();
+            let match;
+            while( match = currentSearchTerm.exec( text ) )
+            {
+                const startPos = editor.document.positionAt( match.index );
+                const endPos = editor.document.positionAt( match.index + match[ 0 ].length );
+                const decoration = { range: new vscode.Range( startPos, endPos ) };
+                terms.push( decoration );
+
+                if( position === undefined )
+                {
+                    position = startPos;
+                }
+            }
+        }
+        editor.setDecorations( decorationType, terms );
+
+        if( positionCursor )
+        {
+            if( position === undefined )
+            {
+                position = new vscode.Position( 2, 0 );
+            }
+
+            editor.selection = new vscode.Selection( position, position );
+            editor.revealRange( editor.selection, vscode.TextEditorRevealType.Default );
+        }
     }
 
     function register()
@@ -115,10 +178,9 @@ function activate( context )
             {
                 vscode.window.showTextDocument( document ).then( function( editor )
                 {
-                    var position = new vscode.Position( 2, 0 );
-                    editor.selection = new vscode.Selection( position, position );
-                    editor.revealRange( editor.selection, vscode.TextEditorRevealType.Default );
                     vscode.commands.executeCommand( 'workbench.action.focusActiveEditorGroup' );
+
+                    highlightSearchTerm( file !== document.fileName );
                 } );
             } );
         } );
@@ -130,6 +192,7 @@ function activate( context )
             vscode.window.showInputBox( { prompt: "Search the journal" } ).then(
                 function( term )
                 {
+                    currentSearchTerm = term !== undefined ? new RegExp( term, 'gi' ) : undefined;
                     if( term )
                     {
                         search( term );
@@ -165,14 +228,9 @@ function activate( context )
 
     var onSave = vscode.workspace.onDidSaveTextDocument( ( e ) =>
     {
-        const rootFolder = getRootFolder();
-
-        if( rootFolder )
+        if( isJournalFile( e.filename ) )
         {
-            if( e.fileName.indexOf( rootFolder.substr( 1 ) ) === 1 )
-            {
-                provider.add( rootFolder, e.fileName );
-            }
+            provider.add( getRootFolder(), e.fileName );
         }
     } );
 
