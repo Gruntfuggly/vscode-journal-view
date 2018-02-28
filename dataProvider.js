@@ -110,13 +110,14 @@ class JournalDataProvider
         var fullPath = path.resolve( rootFolder, entryPath );
         var relativePath = path.relative( rootFolder, fullPath );
         var parts = relativePath.split( path.sep );
-        var dayNumber = parseInt( path.parse( parts.pop() ).name );
+        var day = parts.pop();
+        var dayNumber = parseInt( path.parse( day ).name );
 
         var pathElement;
 
         var entryElement = {
             type: ENTRY,
-            name: dayNumber,
+            name: day,
             displayName: getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) ),
             file: fullPath
         };
@@ -172,20 +173,14 @@ class JournalDataProvider
             return e.name === this;
         }
 
-        var parent = elements;
-        var element;
-        do
-        {
-            element = parent.find( findSubPath, parts[ level ] );
-            if( element !== undefined )
-            {
-                element.state = vscode.TreeItemCollapsibleState.Expanded;
-                this._onDidChangeTreeData.fire( element );
-                parent = element.elements;
-                ++level;
-            }
-        }
+        var element = elements.find( findSubPath, parts[ level ] );
         while( element !== undefined )
+        {
+            element.state = vscode.TreeItemCollapsibleState.Expanded;
+            this._onDidChangeTreeData.fire( element );
+            ++level;
+            element = element.elements ? element.elements.find( findSubPath, parts[ level ] ) : undefined;
+        }
     }
 
     refresh()
