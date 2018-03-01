@@ -4,9 +4,6 @@ This extension adds an explorer viewlet (tree view) to the excellent [vscode-jou
 
 The three icons on the view title bar are Refresh (use to clear search filter), Search and Today. Today opens a new journal entry for the current date.
 
-##### TODO: When clicking entries after the search filter, the search term should be highlighted in the page and shown in the scrollbar.
-##### TODO: Handle zero search results properly
-
 ## Installing
 
 You can install the latest version of the extension via the Visual Studio Marketplace [here](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.vscode-journal-view).

@@ -102,8 +102,6 @@ function activate( context )
 
     function search( term )
     {
-        provider.clear();
-
         const rootFolder = getRootFolder();
 
         scan( rootFolder, function( error, results )
@@ -124,7 +122,8 @@ function activate( context )
             }
         } );
 
-        if( isJournalFile( vscode.window.activeTextEditor.document.fileName ) )
+        var editor = vscode.window.activeTextEditor
+        if( editor && isJournalFile( editor.document.fileName ) )
         {
             highlightSearchTerm( false );
         }
@@ -195,7 +194,8 @@ function activate( context )
                     currentSearchTerm = term !== undefined ? new RegExp( term, 'gi' ) : undefined;
                     if( term )
                     {
-                        search( term );
+                        provider.clear();
+                        setTimeout( search, 200, term );
                     }
                 } );
         } ) );
@@ -228,7 +228,7 @@ function activate( context )
 
     var onSave = vscode.workspace.onDidSaveTextDocument( ( e ) =>
     {
-        if( isJournalFile( e.filename ) )
+        if( isJournalFile( e.fileName ) )
         {
             provider.add( getRootFolder(), e.fileName );
         }

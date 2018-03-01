@@ -119,7 +119,8 @@ class JournalDataProvider
             type: ENTRY,
             name: day,
             displayName: getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) ),
-            file: fullPath
+            file: fullPath,
+            id: fullPath
         };
 
         function findSubPath( e )
@@ -137,6 +138,7 @@ class JournalDataProvider
                 pathElement = {
                     type: PATH,
                     file: subPath,
+                    id: subPath,
                     name: p,
                     displayName: ( level === parts.length - 1 ) ? getMonth( p ) : p,
                     parent: pathElement,

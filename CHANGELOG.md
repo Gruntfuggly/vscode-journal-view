@@ -1,3 +1,7 @@
+# v0.0.4 - 2018-02-28
+- Highlight search term in files
+- Improve view filter
+
 # v0.0.3 - 2018-02-27
 - Allow initial view to be expanded, collapsed or today
 - Add Search (filter) function
