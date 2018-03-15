@@ -3,10 +3,14 @@ var vscode = require( 'vscode' ),
     path = require( "path" ),
     fs = require( 'fs' );
 
+var noteRegex = new RegExp( "\\d\\d\\d\\d" + path.sep + "\\d\\d" + path.sep + "\\d\\d" + path.sep + ".*" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
+var entryRegex = new RegExp( "\\d\\d\\d\\d" + path.sep + "\\d\\d" + path.sep + "\\d\\d" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
+
 var elements = [];
 
 const PATH = "path";
 const ENTRY = "entry";
+const NOTE = "note";
 
 var getMonth = function( number )
 {
@@ -48,15 +52,19 @@ class JournalDataProvider
         }
         else if( element.type === ENTRY )
         {
+            if( element.notes )
+            {
+                return element.notes;
+            }
             return element.text;
         }
     }
 
-    getIcon()
+    getIcon( name )
     {
         var icon = {
-            dark: this._context.asAbsolutePath( path.join( "resources/icons", "dark", "journal-entry.svg" ) ),
-            light: this._context.asAbsolutePath( path.join( "resources/icons", "light", "journal-entry.svg" ) )
+            dark: this._context.asAbsolutePath( path.join( "resources/icons", "dark", name + ".svg" ) ),
+            light: this._context.asAbsolutePath( path.join( "resources/icons", "light", name + ".svg" ) )
         };
 
         return icon;
@@ -80,10 +88,14 @@ class JournalDataProvider
                     vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             }
         }
-        else if( element.type === ENTRY )
-        {
-            treeItem.iconPath = this.getIcon();
 
+        if( element.icon )
+        {
+            treeItem.iconPath = this.getIcon( element.icon );
+        }
+
+        if( element.clickable )
+        {
             treeItem.command = {
                 command: "vscode-journal-view.open",
                 title: "",
@@ -105,22 +117,47 @@ class JournalDataProvider
 
     add( rootFolder, entryPath )
     {
+        var isNote = noteRegex.test( entryPath );
+        var isEntry = entryRegex.test( entryPath );
+
+        if( !isNote && !isEntry )
+        {
+            return;
+        }
+
         var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
 
         var fullPath = path.resolve( rootFolder, entryPath );
         var relativePath = path.relative( rootFolder, fullPath );
         var parts = relativePath.split( path.sep );
-        var day = parts.pop();
-        var dayNumber = parseInt( path.parse( day ).name );
+
+        var day;
+        var dayNumber;
+        var note;
+        if( isEntry )
+        {
+            day = parts.pop();
+            dayNumber = parseInt( path.parse( day ).name );
+        }
+        else
+        {
+            dayNumber = parseInt( parts[ parts.length - 2 ] );
+            day = dayNumber + vscode.workspace.getConfiguration( 'journal' ).ext;
+            parts[ parts.length - 2 ] = day;
+            note = parts.pop();
+        }
+
+        var dayName = getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) );
 
         var pathElement;
 
         var entryElement = {
-            type: ENTRY,
-            name: day,
-            displayName: getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) ),
+            type: isNote ? NOTE : ENTRY,
+            name: isNote ? note : day,
             file: fullPath,
-            id: fullPath
+            id: fullPath.replace,
+            icon: isNote ? "notes" : "journal-entry",
+            clickable: true
         };
 
         function findSubPath( e )
@@ -140,10 +177,16 @@ class JournalDataProvider
                     file: subPath,
                     id: subPath,
                     name: p,
-                    displayName: ( level === parts.length - 1 ) ? getMonth( p ) : p,
+                    displayName: ( level === 1 ) ? getMonth( p ) : ( isNote ? dayName : p ),
                     parent: pathElement,
                     elements: []
                 };
+
+                if( level === 2 )
+                {
+                    pathElement.icon = "journal-entry";
+                    pathElement.clickable = true;
+                }
 
                 parent.push( pathElement );
             }
@@ -156,6 +199,15 @@ class JournalDataProvider
 
         if( !pathElement.elements.find( function( e ) { return e.name === this; }, entryElement.name ) )
         {
+            if( isEntry )
+            {
+                entryElement.displayName = dayName;
+            }
+            else
+            {
+                entryElement.displayName = path.basename( entryElement.name, vscode.workspace.getConfiguration( 'journal' ).ext ).replace( /_/g, ' ' );
+            }
+
             pathElement.elements.push( entryElement );
 
             this._onDidChangeTreeData.fire();

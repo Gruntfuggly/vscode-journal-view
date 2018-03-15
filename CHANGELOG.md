@@ -1,3 +1,6 @@
+# v0.0.5 - 2018-03-15
+- Add support for notes
+
 # v0.0.4 - 2018-02-28
 - Highlight search term in files
 - Improve view filter
