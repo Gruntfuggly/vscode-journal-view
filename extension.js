@@ -31,7 +31,7 @@ function activate( context )
             {
                 var file = list[ i++ ];
                 if( !file ) return done( null, results );
-                file = dir + '/' + file;
+                file = path.join( dir, file );
                 fs.stat( file, function( err, stat )
                 {
                     if( stat && stat.isDirectory() )

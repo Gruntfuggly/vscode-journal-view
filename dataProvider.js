@@ -3,8 +3,8 @@ var vscode = require( 'vscode' ),
     path = require( "path" ),
     fs = require( 'fs' );
 
-var noteRegex = new RegExp( "\\d\\d\\d\\d" + path.sep + "\\d\\d" + path.sep + "\\d\\d" + path.sep + ".*" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
-var entryRegex = new RegExp( "\\d\\d\\d\\d" + path.sep + "\\d\\d" + path.sep + "\\d\\d" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
+var noteRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + ".*" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
+var entryRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
 
 var elements = [];
 

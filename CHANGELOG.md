@@ -1,3 +1,6 @@
+# v0.0.6 - 2018-03-26
+- Fix path separator for windows
+
 # v0.0.5 - 2018-03-15
 - Add support for notes
 
