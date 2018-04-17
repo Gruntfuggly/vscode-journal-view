@@ -12,6 +12,10 @@ const PATH = "path";
 const ENTRY = "entry";
 const NOTE = "note";
 
+var expandView = vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "expanded";
+
+var rootFolder;
+
 var getMonth = function( number )
 {
     var date = new Date();
@@ -70,6 +74,11 @@ class JournalDataProvider
         return icon;
     }
 
+    getParent( element )
+    {
+        return element.parent;
+    }
+
     getTreeItem( element )
     {
         let treeItem = new vscode.TreeItem( element.displayName + ( element.pathLabel ? element.pathLabel : "" ) );
@@ -84,7 +93,7 @@ class JournalDataProvider
             treeItem.collapsibleState = element.state;
             if( treeItem.collapsibleState === 0 || treeItem.collapsibleState === undefined )
             {
-                treeItem.collapsibleState = vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "expanded" ?
+                treeItem.collapsibleState = expandView ?
                     vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
             }
         }
@@ -175,7 +184,6 @@ class JournalDataProvider
                 pathElement = {
                     type: PATH,
                     file: subPath,
-                    id: subPath,
                     name: p,
                     displayName: ( level === 1 ) ? getMonth( p ) : ( isNote ? dayName : p ),
                     parent: pathElement,
@@ -199,6 +207,8 @@ class JournalDataProvider
 
         if( !pathElement.elements.find( function( e ) { return e.name === this; }, entryElement.name ) )
         {
+            entryElement.parent = pathElement;
+
             if( isEntry )
             {
                 entryElement.displayName = dayName;
@@ -214,7 +224,7 @@ class JournalDataProvider
         }
     }
 
-    expand( rootFolder, date )
+    getElement( rootFolder, date )
     {
         var fullPath = path.resolve( rootFolder, date );
         var relativePath = path.relative( rootFolder, fullPath );
@@ -227,19 +237,26 @@ class JournalDataProvider
             return e.name === this;
         }
 
+        var found;
         var element = elements.find( findSubPath, parts[ level ] );
         while( element !== undefined )
         {
-            element.state = vscode.TreeItemCollapsibleState.Expanded;
-            this._onDidChangeTreeData.fire( element );
             ++level;
+            found = element;
             element = element.elements ? element.elements.find( findSubPath, parts[ level ] ) : undefined;
         }
+
+        return found;
     }
 
     refresh()
     {
         this._onDidChangeTreeData.fire();
+    }
+
+    setViewExpanded()
+    {
+        expandView = true;
     }
 }
 exports.JournalDataProvider = JournalDataProvider;
