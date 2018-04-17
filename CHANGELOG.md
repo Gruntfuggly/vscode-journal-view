@@ -1,3 +1,10 @@
+# v0.0.7 - 2018-04-22
+- reveal today at startup
+- change search icon to filter
+- add clear filter icon
+- fix icon order
+- improve search functionality
+
 # v0.0.6 - 2018-03-26
 - Fix path separator for windows
 

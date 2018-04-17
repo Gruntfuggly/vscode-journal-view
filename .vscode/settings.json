@@ -2,5 +2,8 @@
 {
     "typescript.tsdk": "./node_modules/typescript/lib",
     "todo-tree.flat": false,
-    "vscode-journal-view.flat": true // we want to use the TS server from our node_modules folder to control its version
+    "vscode-journal-view.flat": true,
+    "cSpell.words": [
+        "pajoma"
+    ] // we want to use the TS server from our node_modules folder to control its version
 }

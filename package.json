@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -30,17 +30,22 @@
                 {
                     "command": "vscode-journal-view.today",
                     "when": "view == vscode-journal-view",
-                    "group": "navigation"
+                    "group": "navigation@0"
+                },
+                {
+                    "command": "vscode-journal-view.search",
+                    "when": "view == vscode-journal-view && !vscode-journal-view-is-filtered",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "vscode-journal-view.searchClear",
+                    "when": "view == vscode-journal-view && vscode-journal-view-is-filtered",
+                    "group": "navigation@1"
                 },
                 {
                     "command": "vscode-journal-view.refresh",
                     "when": "view == vscode-journal-view",
-                    "group": "navigation"
-                },
-                {
-                    "command": "vscode-journal-view.search",
-                    "when": "view == vscode-journal-view",
-                    "group": "navigation"
+                    "group": "navigation@2"
                 }
             ]
         },
@@ -68,8 +73,17 @@
                 "title": "Search",
                 "category": "vscode-journal-view",
                 "icon": {
-                    "dark": "resources/icons/dark/search.svg",
-                    "light": "resources/icons/light/search.svg"
+                    "dark": "resources/icons/dark/filter.svg",
+                    "light": "resources/icons/light/filter.svg"
+                }
+            },
+            {
+                "command": "vscode-journal-view.searchClear",
+                "title": "Clear",
+                "category": "vscode-journal-view",
+                "icon": {
+                    "dark": "resources/icons/dark/clear-filter.svg",
+                    "light": "resources/icons/light/clear-filter.svg"
                 }
             }
         ],

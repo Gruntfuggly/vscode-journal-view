@@ -12,6 +12,15 @@ const PATH = "path";
 const ENTRY = "entry";
 const NOTE = "note";
 
+var expandView = vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "expanded";
+
+var rootFolder;
+
+String.prototype.endsWith = function( suffix )
+{
+    return this.indexOf( suffix, this.length - suffix.length ) !== -1;
+};
+
 var getMonth = function( number )
 {
     var date = new Date();
@@ -40,15 +49,16 @@ class JournalDataProvider
     {
         if( !element )
         {
-            if( elements.length > 0 )
+            var roots = elements.filter( e => e.visible );
+            if( roots.length > 0 )
             {
-                return elements;
+                return roots;
             }
             return [ { displayName: "Nothing found" } ];
         }
         else if( element.type === PATH )
         {
-            return element.elements;
+            return element.elements.filter( e => e.visible );
         }
         else if( element.type === ENTRY )
         {
@@ -70,6 +80,11 @@ class JournalDataProvider
         return icon;
     }
 
+    getParent( element )
+    {
+        return element.parent;
+    }
+
     getTreeItem( element )
     {
         let treeItem = new vscode.TreeItem( element.displayName + ( element.pathLabel ? element.pathLabel : "" ) );
@@ -81,12 +96,7 @@ class JournalDataProvider
 
         if( element.type === PATH )
         {
-            treeItem.collapsibleState = element.state;
-            if( treeItem.collapsibleState === 0 || treeItem.collapsibleState === undefined )
-            {
-                treeItem.collapsibleState = vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "expanded" ?
-                    vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
-            }
+            treeItem.collapsibleState = expandView ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
         }
 
         if( element.icon )
@@ -155,9 +165,10 @@ class JournalDataProvider
             type: isNote ? NOTE : ENTRY,
             name: isNote ? note : day,
             file: fullPath,
-            id: fullPath.replace,
+            // id: fullPath.replace,
             icon: isNote ? "notes" : "journal-entry",
-            clickable: true
+            clickable: true,
+            visible: true
         };
 
         function findSubPath( e )
@@ -175,11 +186,11 @@ class JournalDataProvider
                 pathElement = {
                     type: PATH,
                     file: subPath,
-                    id: subPath,
                     name: p,
                     displayName: ( level === 1 ) ? getMonth( p ) : ( isNote ? dayName : p ),
                     parent: pathElement,
-                    elements: []
+                    elements: [],
+                    visible: true
                 };
 
                 if( level === 2 )
@@ -199,6 +210,8 @@ class JournalDataProvider
 
         if( !pathElement.elements.find( function( e ) { return e.name === this; }, entryElement.name ) )
         {
+            entryElement.parent = pathElement;
+
             if( isEntry )
             {
                 entryElement.displayName = dayName;
@@ -214,7 +227,31 @@ class JournalDataProvider
         }
     }
 
-    expand( rootFolder, date )
+    setVisible( rootFolder, entryPath )
+    {
+        var fullPath = path.resolve( rootFolder, entryPath );
+        var relativePath = path.relative( rootFolder, fullPath );
+        var parts = relativePath.split( path.sep );
+
+        function findSubPath( e )
+        {
+            return e.name === this;
+        }
+
+        var parent = elements;
+        parts.map( function( p, level )
+        {
+            var child = parent.find( findSubPath, p );
+            if( level === 2 && !p.endsWith( ".md" ) )
+            {
+                child = parent.find( findSubPath, p + ".md" );
+            }
+            child.visible = true;
+            parent = child.elements;
+        } );
+    }
+
+    getElement( rootFolder, date )
     {
         var fullPath = path.resolve( rootFolder, date );
         var relativePath = path.relative( rootFolder, fullPath );
@@ -227,19 +264,43 @@ class JournalDataProvider
             return e.name === this;
         }
 
+        var found;
         var element = elements.find( findSubPath, parts[ level ] );
         while( element !== undefined )
         {
-            element.state = vscode.TreeItemCollapsibleState.Expanded;
-            this._onDidChangeTreeData.fire( element );
             ++level;
-            element = element.elements ? element.elements.find( findSubPath, parts[ level ] ) : undefined;
+            found = element;
+            var part = parts[ level ];
+            if( level === 2 && !part.endsWith( ".md" ) )
+            {
+                part += ".md";
+            }
+            element = element.elements ? element.elements.find( findSubPath, part ) : undefined;
         }
+
+        return found;
     }
 
     refresh()
     {
         this._onDidChangeTreeData.fire();
+    }
+
+    setAllVisible( visible, children )
+    {
+        if( children === undefined )
+        {
+            children = elements;
+        }
+        children.forEach( child =>
+        {
+            child.visible = visible;
+            child.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+            if( child.elements )
+            {
+                this.setAllVisible( visible, child.elements );
+            }
+        } );
     }
 }
 exports.JournalDataProvider = JournalDataProvider;

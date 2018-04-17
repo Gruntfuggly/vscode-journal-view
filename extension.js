@@ -10,8 +10,11 @@ var findInFile = require( 'find-in-file' );
 function activate( context )
 {
     var currentSearchTerm;
+    vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
 
     var provider = new TreeView.JournalDataProvider( context );
+
+    var journalView = vscode.window.createTreeView( "vscode-journal-view", { treeDataProvider: provider } );
 
     const decorationType = vscode.window.createTextEditorDecorationType( {
         overviewRulerColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ),
@@ -19,6 +22,16 @@ function activate( context )
         light: { backgroundColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ) },
         dark: { backgroundColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ) }
     } );
+
+    function revealToday()
+    {
+        var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+        var node = provider.getElement( getRootFolder(), today );
+        if( node )
+        {
+            journalView.reveal( node );
+        }
+    }
 
     function scan( dir, done )
     {
@@ -74,51 +87,77 @@ function activate( context )
         }
     }
 
-    function refresh()
+    function refresh( reveal )
     {
         currentSearchTerm = undefined;
+        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
         provider.clear();
 
         const rootFolder = getRootFolder();
 
-        scan( rootFolder, function( error, results )
+        scan( rootFolder, function( error, files )
         {
-            if( results )
+            if( files )
             {
-                results.map( function( path )
+                files.map( function( path )
                 {
                     provider.add( rootFolder, path );
                 } );
 
-                if( vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "today" )
-                {
-                    var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
-                    provider.expand( getRootFolder(), today );
-                }
                 provider.refresh();
+
+                if( reveal )
+                {
+                    setTimeout( revealToday, 500 );
+                }
             }
         } );
+    }
+    function doReveal( nodes )
+    {
+        if( nodes.length > 0 )
+        {
+            var node = nodes.shift();
+            journalView.reveal( node, { select: false } );
+            setTimeout( doReveal, 10, nodes );
+        }
     }
 
     function search( term )
     {
         const rootFolder = getRootFolder();
 
-        scan( rootFolder, function( error, results )
+        scan( rootFolder, function( error, files )
         {
-            if( results )
+            var revealNodes = [];
+            var revealTimer;
+
+            provider.setAllVisible( false );
+
+            if( files )
             {
-                results.map( function( path )
+                files.map( function( path )
                 {
                     if( findInFile( { files: path, find: new RegExp( term, 'gi' ) }, function( err, matched )
                     {
                         if( !err && matched.length > 0 )
                         {
-                            provider.add( rootFolder, path );
-                            provider.expand( rootFolder, path );
+                            provider.setVisible( rootFolder, path );
+                            var node = provider.getElement( rootFolder, path );
+                            if( node )
+                            {
+                                revealNodes.push( node );
+                                clearTimeout( revealTimer );
+                                revealTimer = setTimeout( doReveal, 10, revealNodes );
+                            }
                         }
                     } ) );
                 } );
+
+                if( !revealTimer )
+                {
+                    provider.refresh();
+                }
             }
         } );
 
@@ -194,10 +233,21 @@ function activate( context )
                     currentSearchTerm = term !== undefined ? new RegExp( term, 'gi' ) : undefined;
                     if( term )
                     {
-                        provider.clear();
-                        setTimeout( search, 200, term );
+                        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', true );
+                        search( term );
                     }
                 } );
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.searchClear', function()
+        {
+            if( currentSearchTerm )
+            {
+                currentSearchTerm = undefined;
+                vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
+                provider.setAllVisible( true );
+                provider.refresh();
+            }
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.today',
@@ -210,6 +260,7 @@ function activate( context )
                         function()
                         {
                             vscode.commands.executeCommand( "journal.today" );
+                            revealToday();
                         },
                         function()
                         {
@@ -219,11 +270,12 @@ function activate( context )
                 } else
                 {
                     vscode.commands.executeCommand( "journal.today" );
+                    revealToday();
                 }
 
             } ) );
 
-        refresh();
+        refresh( vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "today" );
     }
 
     var onSave = vscode.workspace.onDidSaveTextDocument( ( e ) =>
