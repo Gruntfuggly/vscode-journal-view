@@ -118,17 +118,23 @@ function activate( context )
 
         scan( rootFolder, function( error, results )
         {
+            provider.setAllVisible( false );
+            provider.refresh();
+
             if( results )
             {
-                provider.setViewExpanded();
-
                 results.map( function( path )
                 {
                     if( findInFile( { files: path, find: new RegExp( term, 'gi' ) }, function( err, matched )
                     {
                         if( !err && matched.length > 0 )
                         {
-                            provider.add( rootFolder, path );
+                            provider.setVisible( rootFolder, path );
+                            var node = provider.getElement( rootFolder, path );
+                            if( node )
+                            {
+                                journalView.reveal( node );
+                            }
                         }
                     } ) );
                 } );
@@ -201,16 +207,24 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.search', function()
         {
-            vscode.window.showInputBox( { prompt: "Search the journal" } ).then(
-                function( term )
-                {
-                    currentSearchTerm = term !== undefined ? new RegExp( term, 'gi' ) : undefined;
-                    if( term )
+            if( currentSearchTerm )
+            {
+                currentSearchTerm = undefined;
+                provider.setAllVisible( true );
+                provider.refresh();
+            }
+            else
+            {
+                vscode.window.showInputBox( { prompt: "Search the journal" } ).then(
+                    function( term )
                     {
-                        provider.clear();
-                        setTimeout( search, 200, term );
-                    }
-                } );
+                        currentSearchTerm = term !== undefined ? new RegExp( term, 'gi' ) : undefined;
+                        if( term )
+                        {
+                            search( term );
+                        }
+                    } );
+            }
         } ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.today',

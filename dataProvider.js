@@ -44,15 +44,16 @@ class JournalDataProvider
     {
         if( !element )
         {
-            if( elements.length > 0 )
+            var roots = elements.filter( e => e.visible );
+            if( roots.length > 0 )
             {
-                return elements;
+                return roots;
             }
             return [ { displayName: "Nothing found" } ];
         }
         else if( element.type === PATH )
         {
-            return element.elements;
+            return element.elements.filter( e => e.visible );
         }
         else if( element.type === ENTRY )
         {
@@ -90,12 +91,7 @@ class JournalDataProvider
 
         if( element.type === PATH )
         {
-            treeItem.collapsibleState = element.state;
-            if( treeItem.collapsibleState === 0 || treeItem.collapsibleState === undefined )
-            {
-                treeItem.collapsibleState = expandView ?
-                    vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
-            }
+            treeItem.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
         }
 
         if( element.icon )
@@ -166,7 +162,8 @@ class JournalDataProvider
             file: fullPath,
             id: fullPath.replace,
             icon: isNote ? "notes" : "journal-entry",
-            clickable: true
+            clickable: true,
+            visible: true
         };
 
         function findSubPath( e )
@@ -187,7 +184,8 @@ class JournalDataProvider
                     name: p,
                     displayName: ( level === 1 ) ? getMonth( p ) : ( isNote ? dayName : p ),
                     parent: pathElement,
-                    elements: []
+                    elements: [],
+                    visible: true
                 };
 
                 if( level === 2 )
@@ -224,6 +222,26 @@ class JournalDataProvider
         }
     }
 
+    setVisible( rootFolder, entryPath )
+    {
+        var fullPath = path.resolve( rootFolder, entryPath );
+        var relativePath = path.relative( rootFolder, fullPath );
+        var parts = relativePath.split( path.sep );
+
+        function findSubPath( e )
+        {
+            return e.name === this;
+        }
+
+        var parent = elements;
+        parts.map( function( p, level )
+        {
+            var child = parent.find( findSubPath, p );
+            child.visible = true;
+            parent = child.elements;
+        } );
+    }
+
     getElement( rootFolder, date )
     {
         var fullPath = path.resolve( rootFolder, date );
@@ -254,9 +272,20 @@ class JournalDataProvider
         this._onDidChangeTreeData.fire();
     }
 
-    setViewExpanded()
+    setAllVisible( visible, children )
     {
-        expandView = true;
+        if( children === undefined )
+        {
+            children = elements;
+        }
+        children.forEach( child =>
+        {
+            child.visible = visible;
+            if( child.elements )
+            {
+                this.setAllVisible( visible, child.elements );
+            }
+        } );
     }
 }
 exports.JournalDataProvider = JournalDataProvider;
