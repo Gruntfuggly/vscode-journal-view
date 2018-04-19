@@ -111,6 +111,10 @@ function activate( context )
             }
         } );
     }
+    function doReveal( nodes )
+    {
+        nodes.forEach( journalView.reveal );
+    }
 
     function search( term )
     {
@@ -120,6 +124,9 @@ function activate( context )
         {
             provider.setAllVisible( false );
             provider.refresh();
+
+            var revealNodes = [];
+            var revealTimer;
 
             if( results )
             {
@@ -133,7 +140,9 @@ function activate( context )
                             var node = provider.getElement( rootFolder, path );
                             if( node )
                             {
-                                journalView.reveal( node );
+                                revealNodes.push( node );
+                                clearTimeout( revealTimer );
+                                revealTimer = setTimeout( doReveal, 1000, revealNodes );
                             }
                         }
                     } ) );

@@ -16,6 +16,11 @@ var expandView = vscode.workspace.getConfiguration( 'vscode-journal-view' ).init
 
 var rootFolder;
 
+String.prototype.endsWith = function( suffix )
+{
+    return this.indexOf( suffix, this.length - suffix.length ) !== -1;
+};
+
 var getMonth = function( number )
 {
     var date = new Date();
@@ -160,7 +165,7 @@ class JournalDataProvider
             type: isNote ? NOTE : ENTRY,
             name: isNote ? note : day,
             file: fullPath,
-            id: fullPath.replace,
+            // id: fullPath.replace,
             icon: isNote ? "notes" : "journal-entry",
             clickable: true,
             visible: true
@@ -237,6 +242,10 @@ class JournalDataProvider
         parts.map( function( p, level )
         {
             var child = parent.find( findSubPath, p );
+            if( level === 2 && !p.endsWith( ".md" ) )
+            {
+                child = parent.find( findSubPath, p + ".md" );
+            }
             child.visible = true;
             parent = child.elements;
         } );
@@ -261,7 +270,12 @@ class JournalDataProvider
         {
             ++level;
             found = element;
-            element = element.elements ? element.elements.find( findSubPath, parts[ level ] ) : undefined;
+            var part = parts[ level ];
+            if( level === 2 && !part.endsWith( ".md" ) )
+            {
+                part += ".md";
+            }
+            element = element.elements ? element.elements.find( findSubPath, part ) : undefined;
         }
 
         return found;
