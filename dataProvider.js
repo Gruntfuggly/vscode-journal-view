@@ -295,6 +295,7 @@ class JournalDataProvider
         children.forEach( child =>
         {
             child.visible = visible;
+            child.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
             if( child.elements )
             {
                 this.setAllVisible( visible, child.elements );

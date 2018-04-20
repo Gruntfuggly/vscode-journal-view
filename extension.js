@@ -10,6 +10,7 @@ var findInFile = require( 'find-in-file' );
 function activate( context )
 {
     var currentSearchTerm;
+    vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
 
     var provider = new TreeView.JournalDataProvider( context );
 
@@ -89,15 +90,16 @@ function activate( context )
     function refresh( reveal )
     {
         currentSearchTerm = undefined;
+        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
         provider.clear();
 
         const rootFolder = getRootFolder();
 
-        scan( rootFolder, function( error, results )
+        scan( rootFolder, function( error, files )
         {
-            if( results )
+            if( files )
             {
-                results.map( function( path )
+                files.map( function( path )
                 {
                     provider.add( rootFolder, path );
                 } );
@@ -114,23 +116,23 @@ function activate( context )
     function doReveal( nodes )
     {
         nodes.forEach( journalView.reveal );
+        provider.refresh();
     }
 
     function search( term )
     {
         const rootFolder = getRootFolder();
 
-        scan( rootFolder, function( error, results )
+        scan( rootFolder, function( error, files )
         {
-            provider.setAllVisible( false );
-            provider.refresh();
-
             var revealNodes = [];
             var revealTimer;
 
-            if( results )
+            provider.setAllVisible( false );
+
+            if( files )
             {
-                results.map( function( path )
+                files.map( function( path )
                 {
                     if( findInFile( { files: path, find: new RegExp( term, 'gi' ) }, function( err, matched )
                     {
@@ -142,11 +144,16 @@ function activate( context )
                             {
                                 revealNodes.push( node );
                                 clearTimeout( revealTimer );
-                                revealTimer = setTimeout( doReveal, 1000, revealNodes );
+                                revealTimer = setTimeout( doReveal, 300, revealNodes );
                             }
                         }
                     } ) );
                 } );
+
+                if( !revealTimer )
+                {
+                    provider.refresh();
+                }
             }
         } );
 
@@ -216,23 +223,26 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.search', function()
         {
+            vscode.window.showInputBox( { prompt: "Search the journal" } ).then(
+                function( term )
+                {
+                    currentSearchTerm = term !== undefined ? new RegExp( term, 'gi' ) : undefined;
+                    if( term )
+                    {
+                        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', true );
+                        search( term );
+                    }
+                } );
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.searchClear', function()
+        {
             if( currentSearchTerm )
             {
                 currentSearchTerm = undefined;
+                vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
                 provider.setAllVisible( true );
                 provider.refresh();
-            }
-            else
-            {
-                vscode.window.showInputBox( { prompt: "Search the journal" } ).then(
-                    function( term )
-                    {
-                        currentSearchTerm = term !== undefined ? new RegExp( term, 'gi' ) : undefined;
-                        if( term )
-                        {
-                            search( term );
-                        }
-                    } );
             }
         } ) );
 
