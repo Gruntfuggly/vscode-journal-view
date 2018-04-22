@@ -1,3 +1,6 @@
+# v0.0.8 - 2018-04-22
+- update README.md
+
 # v0.0.7 - 2018-04-22
 - reveal today at startup
 - change search icon to filter

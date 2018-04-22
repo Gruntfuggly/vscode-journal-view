@@ -2,7 +2,7 @@
 
 This extension adds an explorer viewlet (tree view) to the excellent [vscode-journal](https://marketplace.visualstudio.com/items?itemName=Pajoma.vscode-journal) extension allowing quick access to the journal files.
 
-The three icons on the view title bar are Refresh (use to clear search filter), Search and Today. Today opens a new journal entry for the current date.
+The three icons on the view title bar are Today, Filter and Refresh. Today opens a new journal entry for the current date.
 
 ## Installing
 
@@ -22,7 +22,7 @@ Determines how the tree is initially displayed. Can be 'collapsed', 'expanded' o
 
 ## Known issues
 
-The initial view can be set to "today", which will try to show the tree collapsed apart revealing the current day. Currently, this reveals the current month only (and doesn't scroll it into view) but some changes to the tree views are expected soon.
+The initial view can be set to "today", which will try to show the tree collapsed apart revealing the current day.
 
 Month and day names should be shown according to your locale, but ordinal indicators (st, nd, rd, etc.) are only English. If anybody knows how to do this in javascript please tell me!
 
