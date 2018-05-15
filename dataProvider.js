@@ -223,7 +223,7 @@ class JournalDataProvider
 
             pathElement.elements.push( entryElement );
 
-            this._onDidChangeTreeData.fire();
+            // this._onDidChangeTreeData.fire();
         }
     }
 
@@ -295,6 +295,7 @@ class JournalDataProvider
         children.forEach( child =>
         {
             child.visible = visible;
+            child.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
             if( child.elements )
             {
                 this.setAllVisible( visible, child.elements );
