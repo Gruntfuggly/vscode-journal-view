@@ -4,6 +4,8 @@ This extension adds an explorer viewlet (tree view) to the excellent [vscode-jou
 
 The three icons on the view title bar are Today, Filter and Refresh. Today opens a new journal entry for the current date.
 
+The view is also now available in a custom view in the activity bar too. You can hide or show the view in the explorer view by right clicking any of the view titlebars. You can hide or show the icon in the activity bar by right clicking anywhere in the activity bar.
+
 ## Installing
 
 You can install the latest version of the extension via the Visual Studio Marketplace [here](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.vscode-journal-view).

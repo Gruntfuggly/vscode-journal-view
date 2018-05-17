@@ -14,6 +14,7 @@ function activate( context )
 
     var provider = new TreeView.JournalDataProvider( context );
 
+    var journalViewExplorer = vscode.window.createTreeView( "vscode-journal-view-explorer", { treeDataProvider: provider } );
     var journalView = vscode.window.createTreeView( "vscode-journal-view", { treeDataProvider: provider } );
 
     const decorationType = vscode.window.createTextEditorDecorationType( {
@@ -29,6 +30,7 @@ function activate( context )
         var node = provider.getElement( getRootFolder(), today );
         if( node )
         {
+            journalViewExplorer.reveal( node );
             journalView.reveal( node );
         }
     }
@@ -118,6 +120,7 @@ function activate( context )
         if( nodes.length > 0 )
         {
             var node = nodes.shift();
+            journalViewExplorer.reveal( node, { select: false } );
             journalView.reveal( node, { select: false } );
             setTimeout( doReveal, 10, nodes );
         }

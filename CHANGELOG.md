@@ -1,3 +1,6 @@
+# v0.0.9 - 2018-05-17
+- Add journal view to activity bar
+
 # v0.0.8 - 2018-04-22
 - update README.md
 

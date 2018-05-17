@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -17,8 +17,23 @@
     ],
     "main": "./extension",
     "contributes": {
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "vscode-journal-view",
+                    "title": "Journal",
+                    "icon": "resources/journal-container.svg"
+                }
+            ]
+        },
         "views": {
             "explorer": [
+                {
+                    "id": "vscode-journal-view-explorer",
+                    "name": "Journal"
+                }
+            ],
+            "vscode-journal-view": [
                 {
                     "id": "vscode-journal-view",
                     "name": "Journal"
@@ -29,22 +44,22 @@
             "view/title": [
                 {
                     "command": "vscode-journal-view.today",
-                    "when": "view == vscode-journal-view",
+                    "when": "view =~ /vscode-journal-view/",
                     "group": "navigation@0"
                 },
                 {
                     "command": "vscode-journal-view.search",
-                    "when": "view == vscode-journal-view && !vscode-journal-view-is-filtered",
+                    "when": "view =~ /vscode-journal-view/ && !vscode-journal-view-is-filtered",
                     "group": "navigation@1"
                 },
                 {
                     "command": "vscode-journal-view.searchClear",
-                    "when": "view == vscode-journal-view && vscode-journal-view-is-filtered",
+                    "when": "view =~ /vscode-journal-view/ && vscode-journal-view-is-filtered",
                     "group": "navigation@1"
                 },
                 {
                     "command": "vscode-journal-view.refresh",
-                    "when": "view == vscode-journal-view",
+                    "when": "view =~ /vscode-journal-view/",
                     "group": "navigation@2"
                 }
             ]
