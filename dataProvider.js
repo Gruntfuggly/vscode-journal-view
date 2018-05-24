@@ -121,8 +121,6 @@ class JournalDataProvider
     clear()
     {
         elements = [];
-        vscode.commands.executeCommand( 'setContext', 'journal-tree-has-content', false );
-        this._onDidChangeTreeData.fire();
     }
 
     add( rootFolder, entryPath )
@@ -222,8 +220,6 @@ class JournalDataProvider
             }
 
             pathElement.elements.push( entryElement );
-
-            this._onDidChangeTreeData.fire();
         }
     }
 
@@ -284,6 +280,7 @@ class JournalDataProvider
     refresh()
     {
         this._onDidChangeTreeData.fire();
+        vscode.commands.executeCommand( 'setContext', 'journal-tree-has-content', false );
     }
 
     setAllVisible( visible, children )
@@ -295,7 +292,6 @@ class JournalDataProvider
         children.forEach( child =>
         {
             child.visible = visible;
-            child.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
             if( child.elements )
             {
                 this.setAllVisible( visible, child.elements );

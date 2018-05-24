@@ -122,7 +122,7 @@ function activate( context )
             var node = nodes.shift();
             journalViewExplorer.reveal( node, { select: false } );
             journalView.reveal( node, { select: false } );
-            setTimeout( doReveal, 10, nodes );
+            setTimeout( doReveal, 1, nodes );
         }
     }
 
@@ -151,7 +151,7 @@ function activate( context )
                             {
                                 revealNodes.push( node );
                                 clearTimeout( revealTimer );
-                                revealTimer = setTimeout( doReveal, 10, revealNodes );
+                                revealTimer = setTimeout( doReveal, 100, revealNodes );
                             }
                         }
                     } ) );
@@ -278,7 +278,8 @@ function activate( context )
 
             } ) );
 
-        refresh( vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "today" );
+        refresh();
+        // refresh( vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "today" );
     }
 
     var onSave = vscode.workspace.onDidSaveTextDocument( ( e ) =>
@@ -286,6 +287,7 @@ function activate( context )
         if( isJournalFile( e.fileName ) )
         {
             provider.add( getRootFolder(), e.fileName );
+            provider.refresh();
         }
     } );
 
