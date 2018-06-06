@@ -114,16 +114,6 @@ function activate( context )
             }
         } );
     }
-    function doReveal( nodes )
-    {
-        if( nodes.length > 0 )
-        {
-            var node = nodes.shift();
-            journalViewExplorer.reveal( node, { select: false } );
-            journalView.reveal( node, { select: false } );
-            setTimeout( doReveal, 1, nodes );
-        }
-    }
 
     function search( term )
     {
@@ -132,34 +122,26 @@ function activate( context )
         scan( rootFolder, function( error, files )
         {
             var revealNodes = [];
-            var revealTimer;
 
+            var count = files.length;
             provider.setAllVisible( false );
 
             if( files )
             {
                 files.map( function( path )
                 {
-                    if( findInFile( { files: path, find: new RegExp( term, 'gi' ) }, function( err, matched )
+                    findInFile( { files: path, find: new RegExp( term, 'gi' ) }, function( err, matched )
                     {
                         if( !err && matched.length > 0 )
                         {
                             provider.setVisible( rootFolder, path );
-                            var node = provider.getElement( rootFolder, path );
-                            if( node )
-                            {
-                                revealNodes.push( node );
-                                clearTimeout( revealTimer );
-                                revealTimer = setTimeout( doReveal, 100, revealNodes );
-                            }
                         }
-                    } ) );
+                        if( --count === 0 )
+                        {
+                            provider.refresh();
+                        }
+                    } );
                 } );
-
-                if( !revealTimer )
-                {
-                    provider.refresh();
-                }
             }
         } );
 
