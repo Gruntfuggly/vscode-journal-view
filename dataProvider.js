@@ -1,7 +1,7 @@
 Object.defineProperty( exports, "__esModule", { value: true } );
-var vscode = require( 'vscode' ),
-    path = require( "path" ),
-    fs = require( 'fs' );
+var vscode = require( 'vscode' );
+var path = require( "path" );
+var fs = require( 'fs' );
 
 var noteRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + ".*" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
 var entryRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
@@ -33,6 +33,35 @@ var getDay = function( date )
     function nth( n ) { return [ "st", "nd", "rd" ][ ( ( n + 90 ) % 100 - 10 ) % 10 - 1 ] || "th" }
 
     return date.toLocaleString( vscode.env.language, { weekday: 'long' } ) + ' ' + date.getDate() + nth( date.getDate() );
+}
+
+var buildCounter = 1;
+var usedHashes = {};
+
+function hash( text )
+{
+    var hash = 0;
+    if( text.length === 0 )
+    {
+        return hash;
+    }
+    for( var i = 0; i < text.length; i++ )
+    {
+        var char = text.charCodeAt( i );
+        hash = ( ( hash << 5 ) - hash ) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+
+    hash = Math.abs( hash ) % 1000000;
+
+    while( usedHashes[ hash ] !== undefined )
+    {
+        hash++;
+    }
+
+    usedHashes[ hash ] = true;
+
+    return hash;
 }
 
 class JournalDataProvider
@@ -88,6 +117,9 @@ class JournalDataProvider
     getTreeItem( element )
     {
         let treeItem = new vscode.TreeItem( element.displayName + ( element.pathLabel ? element.pathLabel : "" ) );
+
+        treeItem.id = element.id;
+
         treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
         if( element.file )
         {
@@ -120,6 +152,7 @@ class JournalDataProvider
 
     clear()
     {
+        usedHashes = {};
         elements = [];
     }
 
@@ -163,7 +196,7 @@ class JournalDataProvider
             type: isNote ? NOTE : ENTRY,
             name: isNote ? note : day,
             file: fullPath,
-            // id: fullPath.replace,
+            id: ( buildCounter * 1000000 ) + hash( fullPath ),
             icon: isNote ? "notes" : "journal-entry",
             clickable: true,
             visible: true
@@ -188,6 +221,7 @@ class JournalDataProvider
                     displayName: ( level === 1 ) ? getMonth( p ) : ( isNote ? dayName : p ),
                     parent: pathElement,
                     elements: [],
+                    id: ( buildCounter * 1000000 ) + hash( subPath ),
                     visible: true
                 };
 

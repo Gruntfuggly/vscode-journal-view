@@ -91,9 +91,8 @@ function activate( context )
 
     function refresh( reveal )
     {
-        currentSearchTerm = undefined;
-        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
         provider.clear();
+        clearFilter();
 
         const rootFolder = getRootFolder();
 
@@ -209,6 +208,14 @@ function activate( context )
         }
     }
 
+    function clearFilter()
+    {
+        currentFilter = undefined;
+        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
+        provider.setAllVisible( true );
+        provider.refresh();
+    }
+
     function register()
     {
         vscode.window.registerTreeDataProvider( 'vscode-journal-view', provider );
@@ -242,16 +249,7 @@ function activate( context )
                 } );
         } ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.searchClear', function()
-        {
-            if( currentSearchTerm )
-            {
-                currentSearchTerm = undefined;
-                vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
-                provider.setAllVisible( true );
-                provider.refresh();
-            }
-        } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.clearFilter', clearFilter ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.today',
             function()

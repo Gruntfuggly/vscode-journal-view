@@ -53,7 +53,7 @@
                     "group": "navigation@1"
                 },
                 {
-                    "command": "vscode-journal-view.searchClear",
+                    "command": "vscode-journal-view.clearFilter",
                     "when": "view =~ /vscode-journal-view/ && vscode-journal-view-is-filtered",
                     "group": "navigation@1"
                 },
@@ -93,7 +93,7 @@
                 }
             },
             {
-                "command": "vscode-journal-view.searchClear",
+                "command": "vscode-journal-view.clearFilter",
                 "title": "Clear",
                 "category": "vscode-journal-view",
                 "icon": {
