@@ -48,19 +48,29 @@
                     "group": "navigation@0"
                 },
                 {
+                    "command": "vscode-journal-view.expand",
+                    "when": "view =~ /vscode-journal-view/ && vscode-journal-view-show-expand",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "vscode-journal-view.collapse",
+                    "when": "view =~ /vscode-journal-view/ && vscode-journal-view-show-collapse",
+                    "group": "navigation@1"
+                },
+                {
                     "command": "vscode-journal-view.search",
                     "when": "view =~ /vscode-journal-view/ && !vscode-journal-view-is-filtered",
-                    "group": "navigation@1"
+                    "group": "navigation@2"
                 },
                 {
                     "command": "vscode-journal-view.clearFilter",
                     "when": "view =~ /vscode-journal-view/ && vscode-journal-view-is-filtered",
-                    "group": "navigation@1"
+                    "group": "navigation@2"
                 },
                 {
                     "command": "vscode-journal-view.refresh",
                     "when": "view =~ /vscode-journal-view/",
-                    "group": "navigation@2"
+                    "group": "navigation@3"
                 }
             ]
         },
@@ -100,21 +110,39 @@
                     "dark": "resources/icons/dark/clear-filter.svg",
                     "light": "resources/icons/light/clear-filter.svg"
                 }
+            },
+            {
+                "command": "vscode-journal-view.expand",
+                "title": "Expand all",
+                "category": "vscode-journal-view",
+                "icon": {
+                    "dark": "resources/icons/dark/expand.svg",
+                    "light": "resources/icons/light/expand.svg"
+                }
+            },
+            {
+                "command": "vscode-journal-view.collapse",
+                "title": "Collapse all",
+                "category": "vscode-journal-view",
+                "icon": {
+                    "dark": "resources/icons/dark/collapse.svg",
+                    "light": "resources/icons/light/collapse.svg"
+                }
             }
         ],
         "configuration": {
             "type": "object",
             "title": "vscode-journal-view configuration",
             "properties": {
-                "vscode-journal-view.initial": {
-                    "type": "string",
-                    "enum": [
-                        "collapsed",
-                        "expanded",
-                        "today"
-                    ],
-                    "description": "Determines how the tree is initially displayed. Can be 'collapsed', 'expanded' or 'today'.",
-                    "default": "today"
+                "vscode-journal-view.expanded": {
+                    "type": "boolean",
+                    "description": "Set to true if you want the view to be initially expanded",
+                    "default": false
+                },
+                "vscode-journal-view.showInExplorer": {
+                    "type": "boolean",
+                    "description": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
+                    "default": true
                 }
             }
         }
