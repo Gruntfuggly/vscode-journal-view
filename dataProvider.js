@@ -1,7 +1,6 @@
 Object.defineProperty( exports, "__esModule", { value: true } );
 var vscode = require( 'vscode' );
 var path = require( "path" );
-var fs = require( 'fs' );
 
 var noteRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + ".*" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
 var entryRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
@@ -11,10 +10,6 @@ var elements = [];
 const PATH = "path";
 const ENTRY = "entry";
 const NOTE = "note";
-
-var expandView = vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "expanded";
-
-var rootFolder;
 
 String.prototype.endsWith = function( suffix )
 {
@@ -128,7 +123,8 @@ class JournalDataProvider
 
         if( element.type === PATH )
         {
-            treeItem.collapsibleState = expandView ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+            treeItem.collapsibleState = vscode.workspace.getConfiguration( 'vscode-journal-view' ).expanded ?
+                vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
         }
 
         if( element.icon )
@@ -309,6 +305,12 @@ class JournalDataProvider
         }
 
         return found;
+    }
+
+    rebuild()
+    {
+        usedHashes = {};
+        buildCounter = ( buildCounter + 1 ) % 100;
     }
 
     refresh()

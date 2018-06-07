@@ -92,7 +92,8 @@ function activate( context )
     function refresh( reveal )
     {
         provider.clear();
-        clearFilter();
+        currentFilter = undefined;
+        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
 
         const rootFolder = getRootFolder();
 
@@ -121,8 +122,6 @@ function activate( context )
 
         scan( rootFolder, function( error, files )
         {
-            var revealNodes = [];
-
             var count = files.length;
             provider.setAllVisible( false );
 
@@ -198,6 +197,23 @@ function activate( context )
         provider.refresh();
     }
 
+    function setButtons()
+    {
+        var expanded = vscode.workspace.getConfiguration( 'vscode-journal-view' ).expanded;
+        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-show-expand', !expanded );
+        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-show-collapse', expanded );
+    }
+
+    function collapse()
+    {
+        vscode.workspace.getConfiguration( 'vscode-journal-view' ).update( 'expanded', false, false );
+    }
+
+    function expand()
+    {
+        vscode.workspace.getConfiguration( 'vscode-journal-view' ).update( 'expanded', true, false );
+    }
+
     function register()
     {
         vscode.window.registerTreeDataProvider( 'vscode-journal-view', provider );
@@ -215,7 +231,20 @@ function activate( context )
             } );
         } );
 
+        context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
+        {
+            if( e.affectsConfiguration( "vscode-journal-view" ) )
+            {
+                vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-in-explorer', vscode.workspace.getConfiguration( 'vscode-journal-view' ).showInExplorer );
+                setButtons();
+                provider.rebuild();
+                refresh( false );
+            }
+        } ) );
+
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.refresh', refresh ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.expand', expand ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.collapse', collapse ) );
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.search', function()
         {
@@ -259,7 +288,7 @@ function activate( context )
             } ) );
 
         refresh();
-        // refresh( vscode.workspace.getConfiguration( 'vscode-journal-view' ).initial === "today" );
+        setButtons();
     }
 
     var onSave = vscode.workspace.onDidSaveTextDocument( ( e ) =>
