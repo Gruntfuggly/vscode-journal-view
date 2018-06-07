@@ -316,7 +316,7 @@ class JournalDataProvider
     refresh()
     {
         this._onDidChangeTreeData.fire();
-        vscode.commands.executeCommand( 'setContext', 'journal-tree-has-content', false );
+        vscode.commands.executeCommand( 'setContext', 'journal-tree-has-content', elements.length > 0 );
     }
 
     setAllVisible( visible, children )

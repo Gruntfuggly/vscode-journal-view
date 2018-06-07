@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-    "version": "0.0.10",
+    "version": "0.0.11",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -30,7 +30,8 @@
             "explorer": [
                 {
                     "id": "vscode-journal-view-explorer",
-                    "name": "Journal"
+                    "name": "Journal",
+                    "when": "journal-tree-has-content && vscode-journal-view-in-explorer"
                 }
             ],
             "vscode-journal-view": [
@@ -44,7 +45,12 @@
             "view/title": [
                 {
                     "command": "vscode-journal-view.today",
-                    "when": "view =~ /vscode-journal-view/",
+                    "when": "view == vscode-journal-view",
+                    "group": "navigation@0"
+                },
+                {
+                    "command": "vscode-journal-view.todayInExplorer",
+                    "when": "view == vscode-journal-view-explorer",
                     "group": "navigation@0"
                 },
                 {
@@ -77,6 +83,15 @@
         "commands": [
             {
                 "command": "vscode-journal-view.today",
+                "title": "Today",
+                "category": "vscode-journal-view",
+                "icon": {
+                    "dark": "resources/icons/dark/journal-entry.svg",
+                    "light": "resources/icons/light/journal-entry.svg"
+                }
+            },
+            {
+                "command": "vscode-journal-view.todayInExplorer",
                 "title": "Today",
                 "category": "vscode-journal-view",
                 "icon": {

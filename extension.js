@@ -24,14 +24,20 @@ function activate( context )
         dark: { backgroundColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ) }
     } );
 
-    function revealToday()
+    function revealToday( revealInExplorer )
     {
         var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
         var node = provider.getElement( getRootFolder(), today );
         if( node )
         {
-            journalViewExplorer.reveal( node );
-            journalView.reveal( node );
+            if( revealInExplorer )
+            {
+                journalViewExplorer.reveal( node );
+            }
+            else
+            {
+                journalView.reveal( node );
+            }
         }
     }
 
@@ -89,7 +95,7 @@ function activate( context )
         }
     }
 
-    function refresh( reveal )
+    function refresh()
     {
         provider.clear();
         currentFilter = undefined;
@@ -105,14 +111,8 @@ function activate( context )
                 {
                     provider.add( rootFolder, path );
                 } );
-
-                provider.refresh();
-
-                if( reveal )
-                {
-                    setTimeout( revealToday, 500 );
-                }
             }
+            provider.refresh();
         } );
     }
 
@@ -218,6 +218,18 @@ function activate( context )
     {
         vscode.window.registerTreeDataProvider( 'vscode-journal-view', provider );
 
+        var xmlExtension = vscode.extensions.getExtension( 'pajoma.vscode-journal' );
+        if( xmlExtension.isActive === false )
+        {
+            xmlExtension.activate().then(
+                function() { },
+                function()
+                {
+                    console.log( "Extension pajoma.vscode-journal activation failed" );
+                }
+            );
+        }
+
         vscode.commands.registerCommand( 'vscode-journal-view.open', ( file ) =>
         {
             vscode.workspace.openTextDocument( file ).then( function( document )
@@ -233,12 +245,13 @@ function activate( context )
 
         context.subscriptions.push( vscode.workspace.onDidChangeConfiguration( function( e )
         {
-            if( e.affectsConfiguration( "vscode-journal-view" ) )
+            if( e.affectsConfiguration( "vscode-journal-view" ) ||
+                e.affectsConfiguration( "journal.base" ) )
             {
-                vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-in-explorer', vscode.workspace.getConfiguration( 'vscode-journal-view' ).showInExplorer );
                 setButtons();
                 provider.rebuild();
-                refresh( false );
+                refresh();
+                vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-in-explorer', vscode.workspace.getConfiguration( 'vscode-journal-view' ).showInExplorer );
             }
         } ) );
 
@@ -262,30 +275,25 @@ function activate( context )
 
         context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.clearFilter', clearFilter ) );
 
-        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.today',
-            function()
+        function revealButtonPressed( revealInExplorer )
+        {
+            vscode.commands.executeCommand( "journal.today" ).then( function()
             {
-                var xmlExtension = vscode.extensions.getExtension( 'pajoma.vscode-journal' );
-                if( xmlExtension.isActive === false )
-                {
-                    xmlExtension.activate().then(
-                        function()
-                        {
-                            vscode.commands.executeCommand( "journal.today" );
-                            revealToday();
-                        },
-                        function()
-                        {
-                            console.log( "Extension pajoma.vscode-journal activation failed" );
-                        }
-                    );
-                } else
-                {
-                    vscode.commands.executeCommand( "journal.today" );
-                    revealToday();
-                }
+                revealToday( revealInExplorer );
+            } );
+        }
 
-            } ) );
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.todayInExplorer', function()
+        {
+            revealButtonPressed( true );
+        } ) );
+
+        context.subscriptions.push( vscode.commands.registerCommand( 'vscode-journal-view.today', function()
+        {
+            revealButtonPressed( false );
+        } ) );
+
+        vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-in-explorer', vscode.workspace.getConfiguration( 'vscode-journal-view' ).showInExplorer );
 
         refresh();
         setButtons();

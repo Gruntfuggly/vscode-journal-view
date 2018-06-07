@@ -1,6 +1,12 @@
+# v0.0.11 - 2018-06-07
+- fix visibility issues
+- bigger tweaks to improve stability of tree
+- remove reveal from filtering as this seems to cause the duplicate items issue
+- add expand/collapse all function
+
 # v0.0.10 - 2018-05-24
 - small tweaks to hopefully reduce duplicate items appearing (#2)
-- disable 'today' setting temporarily
+- disable initial 'today' setting temporarily
 
 # v0.0.9 - 2018-05-17
 - Add journal view to activity bar
