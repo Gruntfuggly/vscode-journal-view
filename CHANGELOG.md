@@ -1,3 +1,6 @@
+# v0.0.12 - 2018-06-21
+- add support for logging via output channel
+
 # v0.0.11 - 2018-06-07
 - fix visibility issues
 - bigger tweaks to improve stability of tree

@@ -9,10 +9,13 @@ var findInFile = require( 'find-in-file' );
 
 function activate( context )
 {
+    var shouldDebug = vscode.workspace.getConfiguration( 'vscode-journal-view' ).debug;
+    var outputChannel = shouldDebug ? vscode.window.createOutputChannel( "vscode-journal-view" ) : undefined;
+
     var currentSearchTerm;
     vscode.commands.executeCommand( 'setContext', 'vscode-journal-view-is-filtered', false );
 
-    var provider = new TreeView.JournalDataProvider( context );
+    var provider = new TreeView.JournalDataProvider( context, outputChannel );
 
     var journalViewExplorer = vscode.window.createTreeView( "vscode-journal-view-explorer", { treeDataProvider: provider } );
     var journalView = vscode.window.createTreeView( "vscode-journal-view", { treeDataProvider: provider } );

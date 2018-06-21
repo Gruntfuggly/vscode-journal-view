@@ -61,12 +61,18 @@ function hash( text )
 
 class JournalDataProvider
 {
-    constructor( _context )
+    constructor( _context, outputChannel )
     {
         this._context = _context;
+        this.outputChannel = outputChannel;
 
         this._onDidChangeTreeData = new vscode.EventEmitter();
         this.onDidChangeTreeData = this._onDidChangeTreeData.event;
+    }
+
+    debug( text )
+    {
+        this.outputChannel && this.outputChannel.appendLine( text );
     }
 
     getChildren( element )
@@ -148,6 +154,7 @@ class JournalDataProvider
 
     clear()
     {
+        this.debug( "clear" );
         usedHashes = {};
         elements = [];
     }
@@ -238,8 +245,6 @@ class JournalDataProvider
 
         if( !pathElement.elements.find( function( e ) { return e.name === this; }, entryElement.name ) )
         {
-            entryElement.parent = pathElement;
-
             if( isEntry )
             {
                 entryElement.displayName = dayName;
@@ -248,6 +253,10 @@ class JournalDataProvider
             {
                 entryElement.displayName = path.basename( entryElement.name, vscode.workspace.getConfiguration( 'journal' ).ext ).replace( /_/g, ' ' );
             }
+
+            this.debug( "add: " + JSON.stringify( entryElement ) );
+
+            entryElement.parent = pathElement;
 
             pathElement.elements.push( entryElement );
         }
@@ -309,12 +318,14 @@ class JournalDataProvider
 
     rebuild()
     {
+        this.debug( "rebuild" );
         usedHashes = {};
         buildCounter = ( buildCounter + 1 ) % 100;
     }
 
     refresh()
     {
+        this.debug( "refresh" );
         this._onDidChangeTreeData.fire();
         vscode.commands.executeCommand( 'setContext', 'journal-tree-has-content', elements.length > 0 );
     }

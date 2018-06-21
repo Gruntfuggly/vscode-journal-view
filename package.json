@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -158,6 +158,11 @@
                     "type": "boolean",
                     "description": "If true, show the view in the explorer. Set to false if you only want to use the dedicated view in the activity bar",
                     "default": true
+                },
+                "vscode-journal-view.debug": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Turn on diagnostic logging (reload required)"
                 }
             }
         }
