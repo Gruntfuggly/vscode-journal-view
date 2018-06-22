@@ -1,3 +1,6 @@
+# v0.0.13 - 2018-06-22
+- fix duplicate item problem
+
 # v0.0.12 - 2018-06-21
 - add support for logging via output channel
 

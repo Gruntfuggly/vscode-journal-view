@@ -16,6 +16,11 @@ String.prototype.endsWith = function( suffix )
     return this.indexOf( suffix, this.length - suffix.length ) !== -1;
 };
 
+function twoDigits( value )
+{
+    return ( value < 10 ) ? "0" + value : value;
+}
+
 var getMonth = function( number )
 {
     var date = new Date();
@@ -186,7 +191,7 @@ class JournalDataProvider
         else
         {
             dayNumber = parseInt( parts[ parts.length - 2 ] );
-            day = dayNumber + vscode.workspace.getConfiguration( 'journal' ).ext;
+            day = twoDigits( dayNumber ) + vscode.workspace.getConfiguration( 'journal' ).ext;
             parts[ parts.length - 2 ] = day;
             note = parts.pop();
         }
