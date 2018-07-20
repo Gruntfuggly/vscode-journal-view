@@ -221,12 +221,20 @@ class JournalDataProvider
             var child = parent.find( findSubPath, p );
             if( !child )
             {
+                var displayName = p;
+                if( level === 1 )
+                {
+                    displayName = getMonth( p );
+                } else if( level > 1 && isNote )
+                {
+                    displayName = dayName;
+                }
                 var subPath = path.join( rootFolder, parts.slice( 0, level + 1 ).join( path.sep ) );
                 pathElement = {
                     type: PATH,
                     file: subPath,
                     name: p,
-                    displayName: ( level === 1 ) ? getMonth( p ) : ( isNote ? dayName : p ),
+                    displayName: displayName,
                     parent: pathElement,
                     elements: [],
                     id: ( buildCounter * 1000000 ) + hash( subPath ),

@@ -1,3 +1,6 @@
+# v0.0.14 - 2018-07-20
+- fix notes on first day of the month issue
+
 # v0.0.13 - 2018-06-22
 - fix duplicate item problem
 
