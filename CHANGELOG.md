@@ -1,3 +1,6 @@
+# v0.0.15 - 2018-09-25
+- handle journal file extension change
+
 # v0.0.14 - 2018-07-20
 - fix notes on first day of the month issue
 

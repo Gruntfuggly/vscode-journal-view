@@ -46,6 +46,11 @@ function activate( context )
 
     function scan( dir, done )
     {
+        var extension = vscode.workspace.getConfiguration( 'journal' ).ext;
+        if( extension.indexOf( '.' ) === -1 )
+        {
+            extension = '.' + extension;
+        }
         var results = [];
         fs.readdir( dir, function( err, list )
         {
@@ -65,9 +70,10 @@ function activate( context )
                             results = results.concat( res );
                             next();
                         } );
-                    } else
+                    }
+                    else
                     {
-                        if( path.extname( file ) === vscode.workspace.getConfiguration( 'journal' ).ext )
+                        if( path.extname( file ) === extension )
                         {
                             results.push( file );
                         }

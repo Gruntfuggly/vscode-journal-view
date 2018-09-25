@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -147,7 +147,7 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "vscode-journal-view configuration",
+            "title": "Journal View",
             "properties": {
                 "vscode-journal-view.expanded": {
                     "type": "boolean",
