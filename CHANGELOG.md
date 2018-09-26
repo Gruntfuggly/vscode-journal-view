@@ -1,3 +1,6 @@
+# v0.0.16 - 2018-09-26
+- handle journal file extension change everywhere
+
 # v0.0.15 - 2018-09-25
 - handle journal file extension change
 

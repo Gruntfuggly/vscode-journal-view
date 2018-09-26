@@ -27,9 +27,19 @@ function activate( context )
         dark: { backgroundColor: new vscode.ThemeColor( 'editor.findMatchHighlightBackground' ) }
     } );
 
+    function getExt()
+    {
+        var extension = vscode.workspace.getConfiguration( 'journal' ).ext;
+        if( extension.indexOf( '.' ) === -1 )
+        {
+            extension = '.' + extension;
+        }
+        return extension;
+    }
+
     function revealToday( revealInExplorer )
     {
-        var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+        var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + getExt();
         var node = provider.getElement( getRootFolder(), today );
         if( node )
         {
@@ -46,11 +56,7 @@ function activate( context )
 
     function scan( dir, done )
     {
-        var extension = vscode.workspace.getConfiguration( 'journal' ).ext;
-        if( extension.indexOf( '.' ) === -1 )
-        {
-            extension = '.' + extension;
-        }
+        var extension = getExt();
         var results = [];
         fs.readdir( dir, function( err, list )
         {

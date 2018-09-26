@@ -2,8 +2,18 @@ Object.defineProperty( exports, "__esModule", { value: true } );
 var vscode = require( 'vscode' );
 var path = require( "path" );
 
-var noteRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + ".*" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
-var entryRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d" + vscode.workspace.getConfiguration( 'journal' ).ext + "$" );
+function getExt()
+{
+    var extension = vscode.workspace.getConfiguration( 'journal' ).ext;
+    if( extension.indexOf( '.' ) === -1 )
+    {
+        extension = '.' + extension;
+    }
+    return extension;
+}
+
+var noteRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + ".*" + getExt() + "$" );
+var entryRegex = new RegExp( "\\d\\d\\d\\d\\" + path.sep + "\\d\\d\\" + path.sep + "\\d\\d" + getExt() + "$" );
 
 var elements = [];
 
@@ -174,7 +184,7 @@ class JournalDataProvider
             return;
         }
 
-        var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+        var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + getExt();
 
         var fullPath = path.resolve( rootFolder, entryPath );
         var relativePath = path.relative( rootFolder, fullPath );
@@ -191,7 +201,7 @@ class JournalDataProvider
         else
         {
             dayNumber = parseInt( parts[ parts.length - 2 ] );
-            day = twoDigits( dayNumber ) + vscode.workspace.getConfiguration( 'journal' ).ext;
+            day = twoDigits( dayNumber ) + getExt();
             parts[ parts.length - 2 ] = day;
             note = parts.pop();
         }
@@ -264,7 +274,7 @@ class JournalDataProvider
             }
             else
             {
-                entryElement.displayName = path.basename( entryElement.name, vscode.workspace.getConfiguration( 'journal' ).ext ).replace( /_/g, ' ' );
+                entryElement.displayName = path.basename( entryElement.name, getExt() ).replace( /_/g, ' ' );
             }
 
             this.debug( "add: " + JSON.stringify( entryElement ) );
@@ -290,9 +300,9 @@ class JournalDataProvider
         parts.map( function( p, level )
         {
             var child = parent.find( findSubPath, p );
-            if( level === 2 && !p.endsWith( ".md" ) )
+            if( level === 2 && !p.endsWith( getExt() ) )
             {
-                child = parent.find( findSubPath, p + ".md" );
+                child = parent.find( findSubPath, p + getExt() );
             }
             child.visible = true;
             parent = child.elements;
@@ -319,9 +329,9 @@ class JournalDataProvider
             ++level;
             found = element;
             var part = parts[ level ];
-            if( level === 2 && !part.endsWith( ".md" ) )
+            if( level === 2 && !part.endsWith( getExt() ) )
             {
-                part += ".md";
+                part += getExt();
             }
             element = element.elements ? element.elements.find( findSubPath, part ) : undefined;
         }
