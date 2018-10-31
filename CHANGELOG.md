@@ -1,3 +1,6 @@
+# v0.0.17 - 2018-10-31
+- fix weird month name issue
+
 # v0.0.16 - 2018-09-26
 - handle journal file extension change everywhere
 
