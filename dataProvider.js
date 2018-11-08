@@ -33,8 +33,7 @@ function twoDigits( value )
 
 var getMonth = function( number )
 {
-    var date = new Date( 0 );
-    date.setMonth( parseInt( number ) - 1 );
+    var date = new Date( 1970, parseInt( number ) - 1, 1 );
     return date.toLocaleString( vscode.env.language, { month: "long" } );
 }
 

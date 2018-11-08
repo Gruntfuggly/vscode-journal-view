@@ -1,3 +1,6 @@
+# v0.0.18 - 2018-11-08
+- fix weird month name issue in a better way
+
 # v0.0.17 - 2018-10-31
 - fix weird month name issue
 
