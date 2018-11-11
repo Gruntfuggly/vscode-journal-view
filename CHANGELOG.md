@@ -1,3 +1,6 @@
+# v0.0.19 - 2018-11-11
+- Sort entries as they are added
+
 # v0.0.18 - 2018-11-08
 - fix weird month name issue in a better way
 

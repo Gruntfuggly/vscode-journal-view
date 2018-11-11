@@ -44,6 +44,11 @@ var getDay = function( date )
     return date.toLocaleString( vscode.env.language, { weekday: 'long' } ) + ' ' + date.getDate() + nth( date.getDate() );
 }
 
+var sortByDate = function( a, b )
+{
+    return a.date > b.date;
+};
+
 var buildCounter = 1;
 var usedHashes = {};
 
@@ -205,7 +210,8 @@ class JournalDataProvider
             note = parts.pop();
         }
 
-        var dayName = getDay( new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber ) );
+        var date = new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber );
+        var dayName = getDay( date );
 
         var pathElement;
 
@@ -215,6 +221,7 @@ class JournalDataProvider
             file: fullPath,
             id: ( buildCounter * 1000000 ) + hash( fullPath ),
             icon: isNote ? "notes" : "journal-entry",
+            date: date,
             clickable: true,
             visible: true
         };
@@ -247,6 +254,7 @@ class JournalDataProvider
                     parent: pathElement,
                     elements: [],
                     id: ( buildCounter * 1000000 ) + hash( subPath ),
+                    date: date,
                     visible: true
                 };
 
@@ -257,6 +265,7 @@ class JournalDataProvider
                 }
 
                 parent.push( pathElement );
+                parent.sort( sortByDate );
             }
             else
             {
@@ -281,6 +290,8 @@ class JournalDataProvider
             entryElement.parent = pathElement;
 
             pathElement.elements.push( entryElement );
+            pathElement.elements.sort( sortByDate );
+
         }
     }
 
