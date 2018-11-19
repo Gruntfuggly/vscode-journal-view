@@ -1,3 +1,6 @@
+# v0.0.20 - 2018-11-19
+- Use the same method as vscode-journal to populate base folder (allows ${homeDir} substitution)
+
 # v0.0.19 - 2018-11-11
 - Sort entries as they are added
 

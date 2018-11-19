@@ -96,6 +96,15 @@ function activate( context )
         if( rootFolder === "" )
         {
             rootFolder = path.resolve( os.homedir(), "Journal" );
+        } else
+        {
+            if( rootFolder[ 0 ] === '~' )
+            {
+                rootFolder = os.homedir() + rootFolder.substring( 1 );
+            }
+            rootFolder = rootFolder.replace( "${homeDir}", os.homedir() );
+            rootFolder = path.normalize( rootFolder );
+            rootFolder = path.format( path.parse( rootFolder ) );
         }
         return rootFolder;
     }
