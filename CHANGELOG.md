@@ -1,3 +1,6 @@
+# v0.0.21 - 2019-01-04
+- Cope with UTC offsets (thanks to [Flagrare](https://github.com/Flagrare))
+
 # v0.0.20 - 2018-11-19
 - Use the same method as vscode-journal to populate base folder (allows ${homeDir} substitution)
 
