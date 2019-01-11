@@ -33,7 +33,7 @@ function twoDigits( value )
 
 var getMonth = function( number )
 {
-    var date = new Date( 1970, parseInt( number ) - 1, 1 );
+    var date = new Date( 1970, parseInt( number ) - 1, 15 );
     var userTimezoneOffset = date.getTimezoneOffset() * 60000;
     var userDate = new Date(date.getTime() - userTimezoneOffset);
     return userDate.toLocaleString( vscode.env.language, { month: "long" } );
