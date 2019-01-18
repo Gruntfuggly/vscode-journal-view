@@ -1,3 +1,6 @@
+# v0.0.22 - 2019-01-18
+- Another improvement to displaying month names (thanks to [marciopamplona](https://github.com/marciopamplona))
+
 # v0.0.21 - 2019-01-04
 - Cope with UTC offsets (thanks to [Flagrare](https://github.com/Flagrare))
 
