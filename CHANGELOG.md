@@ -1,3 +1,6 @@
+# v0.0.23 - 2019-02-27
+- Fix errors when creating resources
+
 # v0.0.22 - 2019-01-18
 - Another improvement to displaying month names (thanks to [marciopamplona](https://github.com/marciopamplona))
 
