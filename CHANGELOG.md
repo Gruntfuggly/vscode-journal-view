@@ -1,3 +1,6 @@
+# v0.0.25 - 2019-03-27
+- Allow non journal files in the root folder
+
 # v0.0.24 - 2019-03-27
 - Add configurable option to show non journal files in the tree
 
