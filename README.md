@@ -22,6 +22,10 @@ The extension can be customised as follows:
 
 Set this to false if you would prefer to only see the journal view in the dedicated pane. When set to true, the view will also be shown in the explorer pane.
 
+`vscode-journal-view.showNonJournalFiles`
+
+Set this to true if you want other files in the journal folder to be shown in the tree view. *Note: Only files with the configured extension (.md by default) will be shown.*
+
 ## Known issues
 
 Month and day names should be shown according to your locale, but ordinal indicators (st, nd, rd, etc.) are only English. If anybody knows how to do this in javascript please tell me!

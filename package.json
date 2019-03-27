@@ -3,7 +3,7 @@
     "displayName": "vscode-journal-view",
     "icon": "resources/vscode-journal.png",
     "description": "Extends the vscode-journal extension with a viewlet",
-    "version": "0.0.23",
+    "version": "0.0.24",
     "publisher": "Gruntfuggly",
     "repository": "https://github.com/Gruntfuggly/vscode-journal-view",
     "engines": {
@@ -163,6 +163,11 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Turn on diagnostic logging (reload required)"
+                },
+                "vscode-journal-view.showNonJournalFiles": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Show files which are not in the standard journal structure"
                 }
             }
         }

@@ -1,3 +1,6 @@
+# v0.0.24 - 2019-03-27
+- Add configurable option to show non journal files in the tree
+
 # v0.0.23 - 2019-02-27
 - Fix errors when creating resources
 

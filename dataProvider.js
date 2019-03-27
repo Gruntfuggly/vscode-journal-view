@@ -1,6 +1,7 @@
 Object.defineProperty( exports, "__esModule", { value: true } );
 var vscode = require( 'vscode' );
 var path = require( "path" );
+var fs = require( "fs" );
 
 function getExt()
 {
@@ -185,48 +186,60 @@ class JournalDataProvider
         var isNote = noteRegex.test( entryPath );
         var isEntry = entryRegex.test( entryPath );
 
-        if( !isNote && !isEntry )
-        {
-            return;
-        }
-
-        var today = new Date().toISOString().substr( 0, 10 ).replace( /\-/g, path.sep ) + getExt();
-
         var fullPath = path.resolve( rootFolder, entryPath );
         var relativePath = path.relative( rootFolder, fullPath );
         var parts = relativePath.split( path.sep );
 
-        var day;
-        var dayNumber;
-        var note;
-        if( isEntry )
+        if( isNote || isEntry )
         {
-            day = parts.pop();
-            dayNumber = parseInt( path.parse( day ).name );
+            var day;
+            var dayNumber;
+            var note;
+            if( isEntry )
+            {
+                day = parts.pop();
+                dayNumber = parseInt( path.parse( day ).name );
+            }
+            else
+            {
+                dayNumber = parseInt( parts[ parts.length - 2 ] );
+                day = twoDigits( dayNumber ) + getExt();
+                parts[ parts.length - 2 ] = day;
+                note = parts.pop();
+            }
+
+            var date = new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber );
+            var dayName = getDay( date );
+
+            var pathElement;
+
+            var entryElement = {
+                type: isNote ? NOTE : ENTRY,
+                name: isNote ? note : day,
+                file: fullPath,
+                id: ( buildCounter * 1000000 ) + hash( fullPath ),
+                icon: isNote ? "notes" : "journal-entry",
+                date: date,
+                clickable: true,
+                visible: true
+            };
+        }
+        else if( vscode.workspace.getConfiguration( 'vscode-journal-view' ).showNonJournalFiles === true )
+        {
+            var entryElement = {
+                type: NOTE,
+                name: parts[ parts.length - 1 ],
+                file: fullPath,
+                id: ( buildCounter * 1000000 ) + hash( fullPath ),
+                icon: "notes",
+                clickable: true,
+                visible: true
+            };
         }
         else
         {
-            dayNumber = parseInt( parts[ parts.length - 2 ] );
-            day = twoDigits( dayNumber ) + getExt();
-            parts[ parts.length - 2 ] = day;
-            note = parts.pop();
+            return;
         }
-
-        var date = new Date( parseInt( parts[ 0 ] ), parseInt( parts[ 1 ] ) - 1, dayNumber );
-        var dayName = getDay( date );
-
-        var pathElement;
-
-        var entryElement = {
-            type: isNote ? NOTE : ENTRY,
-            name: isNote ? note : day,
-            file: fullPath,
-            id: ( buildCounter * 1000000 ) + hash( fullPath ),
-            icon: isNote ? "notes" : "journal-entry",
-            date: date,
-            clickable: true,
-            visible: true
-        };
 
         function findSubPath( e )
         {
@@ -240,7 +253,7 @@ class JournalDataProvider
             if( !child )
             {
                 var displayName = p;
-                if( level === 1 )
+                if( level === 1 && ( isEntry || isNote ) )
                 {
                     displayName = getMonth( p );
                 } else if( level > 1 && isNote )
@@ -248,35 +261,42 @@ class JournalDataProvider
                     displayName = dayName;
                 }
                 var subPath = path.join( rootFolder, parts.slice( 0, level + 1 ).join( path.sep ) );
-                pathElement = {
-                    type: PATH,
-                    file: subPath,
-                    name: p,
-                    displayName: displayName,
-                    parent: pathElement,
-                    elements: [],
-                    id: ( buildCounter * 1000000 ) + hash( subPath ),
-                    date: date,
-                    visible: true
-                };
 
-                if( level === 2 )
+                if( isEntry || isNote || ( fs.existsSync( subPath ) && fs.lstatSync( subPath ).isDirectory() ) )
                 {
-                    pathElement.icon = "journal-entry";
-                    pathElement.clickable = true;
-                }
+                    pathElement = {
+                        type: PATH,
+                        file: subPath,
+                        name: p,
+                        displayName: displayName,
+                        parent: pathElement,
+                        elements: [],
+                        id: ( buildCounter * 1000000 ) + hash( subPath ),
+                        date: date,
+                        visible: true
+                    };
 
-                parent.push( pathElement );
-                parent.sort( sortByDate );
+                    if( level === 2 && ( isEntry || isNote ) )
+                    {
+                        pathElement.icon = "journal-entry";
+                        pathElement.clickable = true;
+                    }
+
+                    parent.push( pathElement );
+                    parent.sort( sortByDate );
+                }
             }
             else
             {
                 pathElement = child;
             }
-            parent = pathElement.elements;
+            if( pathElement )
+            {
+                parent = pathElement.elements;
+            }
         } );
 
-        if( !pathElement.elements.find( function( e ) { return e.name === this; }, entryElement.name ) )
+        if( !pathElement || !pathElement.elements.find( function( e ) { return e.name === this; }, entryElement.name ) )
         {
             if( isEntry )
             {
@@ -291,9 +311,16 @@ class JournalDataProvider
 
             entryElement.parent = pathElement;
 
-            pathElement.elements.push( entryElement );
-            pathElement.elements.sort( sortByDate );
-
+            if( pathElement )
+            {
+                pathElement.elements.push( entryElement );
+                pathElement.elements.sort( sortByDate );
+            }
+            else
+            {
+                elements.push( entryElement );
+                elements.sort( sortByDate );
+            }
         }
     }
 
