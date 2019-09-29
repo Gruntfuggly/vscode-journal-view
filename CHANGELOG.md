@@ -1,3 +1,6 @@
+# v0.0.26 - 2019-09-29
+- Fix sorting
+
 # v0.0.25 - 2019-03-27
 - Allow non journal files in the root folder
 
